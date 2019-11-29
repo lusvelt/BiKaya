@@ -6,7 +6,12 @@ LD = $(XT_PRG_PREFIX)ld
 
 # uARM-related paths
 UARM_DIR = ./uarm
-INCLUDE_DIR = ./include
+INCLUDE_DIR = ./include 
+SRC_DIR = ./src
+BUILD_DIR = ./out/uarm
+
+SRCS = $(wildcard *.c)
+OBJS = $(addprefix $(BUILD_DIR)/,$(SRCS:.c=.o)) 
 
 # Compiler options
 CFLAGS_LANG = 
@@ -18,20 +23,27 @@ LDFLAGS = -G 0 -nostdlib -T $(UARM_DIR)/elf32ltsarm.h.uarmcore.x
 
 # Add the location of crt*.S to the search path
 VPATH = $(UARM_DIR)
+TARGET = $(BUILD_DIR)/kernel
 
 .PHONY : all clean
 
 all : kernel.core.uarm
 
-kernel.core.uarm : kernel
+kernel.core.uarm : $(TARGET)
 	elf2uarm -k $<
 
-kernel : hello.o termprint.o crtso.o libuarm.o
+$(TARGET) : $(OBJS) 
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean:
 	-rm -f *.o kernel kernel.*.uarm
+	-rm -rf $(BUILD_DIR)
+
+$(BUILD_DIR)/%.o: %.c
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Pattern rule for assembly modules
-%.o : %.s
+$(BUILD_DIR)/%.o: %.s
 	$(CC) $(CFLAGS) -c -o $@ $<
+
