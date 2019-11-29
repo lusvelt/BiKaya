@@ -1,10 +1,4 @@
-.config
-.config.old
-.sconsign.dblite
-umps2.config
 *.umps
 *.uarm
 *.o
 kernel
-.config
-.env

@@ -21,7 +21,10 @@ VPATH = $(UARM_DIR)
 
 .PHONY : all clean
 
-all : kernel
+all : kernel.core.uarm
+
+kernel.core.uarm : kernel
+	elf2uarm -k $<
 
 kernel : hello.o termprint.o crtso.o libuarm.o
 	$(LD) -o $@ $^ $(LDFLAGS)

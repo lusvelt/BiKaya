@@ -1,24 +1,22 @@
 #include "system.h"
 
-#define ST_READY           1
-#define ST_BUSY            3
-#define ST_TRANSMITTED     5
+#define ST_READY 1
+#define ST_BUSY 3
+#define ST_TRANSMITTED 5
 
-#define CMD_ACK            1
-#define CMD_TRANSMIT       2
+#define CMD_ACK 1
+#define CMD_TRANSMIT 2
 
-#define CHAR_OFFSET        8
-#define TERM_STATUS_MASK   0xFF
+#define CHAR_OFFSET 8
+#define TERM_STATUS_MASK 0xFF
 
-static termreg_t *term0_reg = (termreg_t *) DEV_REG_ADDR(IL_TERMINAL, 0);
+static termreg_t *term0_reg = (termreg_t *)DEV_REG_ADDR(IL_TERMINAL, 0);
 
-static unsigned int tx_status(termreg_t *tp)
-{
+static unsigned int tx_status(termreg_t *tp) {
     return ((tp->transm_status) & TERM_STATUS_MASK);
 }
 
-static int term_putchar(char c)
-{
+static int term_putchar(char c) {
     unsigned int stat;
 
     stat = tx_status(term0_reg);
@@ -38,9 +36,7 @@ static int term_putchar(char c)
         return 0;
 }
 
-
-void term_puts(const char *str)
-{
+void term_puts(const char *str) {
     while (*str)
         if (term_putchar(*str++))
             return;

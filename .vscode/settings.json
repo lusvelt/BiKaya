@@ -1,10 +1,23 @@
 {
     "files.associations": {
-        "SConstruct": "python",
         "termprint.h": "c",
-        "uarmmake" : "makefile",
-        "umpsmake" : "makefile",
+        "uarmmake": "makefile",
+        "umpsmake": "makefile",
+        "system.h": "c",
+        "libumps.h": "c",
+        "**/uarm/**/*": "plaintext",
+        "**/umps/**/*": "plaintext"
     },
-    "python.pythonPath": "${workspaceFolder}/.env/bin/python3.7",
-    "python.formatting.provider": "yapf"
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 0 }",
+    "C_Cpp.default.includePath": [
+        "include",
+        "uarm/uarm",
+        "umps/umps"
+    ],
+    "C_Cpp.default.defines": [
+        "TARGET_UMPS",
+        "TARGET_UARM"
+    ]
 }
