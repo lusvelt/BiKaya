@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "SConstruct": "python",
+        "termprint.h": "c",
+        "uarmmake" : "makefile",
+        "umpsmake" : "makefile",
+    },
+    "python.pythonPath": "${workspaceFolder}/.env/bin/python3.7",
+    "python.formatting.provider": "yapf"
+}
