@@ -1,18 +1,18 @@
 
-default:
-	@echo "Please specify a target"
+all:
+	$(MAKE) -f makefiles/base.mk ARCH=umps
+	$(MAKE) -f makefiles/base.mk ARCH=uarm
 
 umps:
-	$(MAKE) -f umpsmake
+	$(MAKE) -f makefiles/base.mk ARCH=umps
 	
 umps2:
-	$(MAKE) -f umpsmake
+	$(MAKE) -f makefiles/base.mk ARCH=umps
 
 uarm:
-	$(MAKE) -f uarmmake
+	$(MAKE) -f makefiles/base.mk ARCH=uarm
 
 clean:
-	$(MAKE) -f uarmmake clean
-	$(MAKE) -f umpsmake clean
+	$(MAKE) -f makefiles/base.mk clean
 
-.PHONY: umps umps2 uarm clean default
+.PHONY: umps umps2 uarm clean all

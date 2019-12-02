@@ -12,9 +12,10 @@
     "editor.formatOnPaste": true,
     "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 0 }",
     "C_Cpp.default.includePath": [
-        "include",
-        "uarm/uarm",
-        "umps/umps"
+        "${workspaceFolder}",
+        "uarm",
+        "umps",
+        "include"
     ],
     "C_Cpp.default.defines": [
         "TARGET_UMPS",

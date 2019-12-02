@@ -1,4 +1,1 @@
-*.umps
-*.uarm
-*.o
-kernel
+out/

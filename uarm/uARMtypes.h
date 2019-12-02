@@ -22,7 +22,7 @@
 #ifndef UARMTYPES_H
 #define UARMTYPES_H
 
-#include <uARMconst.h>
+#include "uARMconst.h"
 
 /************************** Device register types ***************************/
 
