@@ -30,6 +30,8 @@ VPATH := $(ARCH_DIR)
 TARGET := kernel.core.$(ARCH)
 KERNEL := $(BUILD_DIR)/kernel
 
+.PHONY: all clean
+
 all: $(TARGET)
 
 $(TARGET): $(KERNEL)
