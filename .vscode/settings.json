@@ -1,10 +1,5 @@
 {
     "files.associations": {
-        "termprint.h": "c",
-        "uarmmake": "makefile",
-        "umpsmake": "makefile",
-        "system.h": "c",
-        "libumps.h": "c",
         "**/uarm/**/*": "plaintext",
         "**/umps/**/*": "plaintext"
     },
@@ -18,7 +13,7 @@
         "include"
     ],
     "C_Cpp.default.defines": [
-        "TARGET_UMPS",
-        "TARGET_UARM"
+        "TARGET_UMPS=1",
+        "TARGET_UARM=1"
     ]
 }

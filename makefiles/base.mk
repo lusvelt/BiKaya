@@ -1,9 +1,3 @@
-ifeq ($(ARCH),umps)
-include makefiles/umps.mk
-else ifeq ($(ARCH),uarm)
-include makefiles/uarm.mk
-endif
-
 # Toolchain
 CC := $(ARCH_PREFIX)gcc
 LD := $(ARCH_PREFIX)ld
@@ -11,6 +5,7 @@ LD := $(ARCH_PREFIX)ld
 # Directories
 SRC_DIR := ./src
 INCLUDE_DIR := ./include
+ARCH_DIR := ./$(ARCH)
 BUILD_DIR := ./out/$(ARCH)
 
 # Sources
@@ -22,7 +17,7 @@ OBJS += $(addprefix $(BUILD_DIR)/,$(ARCH_OBJS))
 CFLAGS := $(ARCH_CFLAGS) -I. -I$(ARCH_DIR) -I$(INCLUDE_DIR) -Wall -O0
 
 # Linker options
-LDFLAGS := -G 0 -nostdlib $(ARCH_LDFLAGS)
+LDFLAGS := -G 0 -nostdlib -T $(ARCH_DIR)/$(ARCH_LDSCRIPT)
 
 VPATH := $(ARCH_DIR)
 

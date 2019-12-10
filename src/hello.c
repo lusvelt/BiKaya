@@ -1,8 +1,17 @@
+#include "printer.h"
 #include "system.h"
-#include "termprint.h"
+#include "term.h"
+
+#define BUFSIZE 256
 
 int main(void) {
-    term_puts("hello, world\n");
+    char str[BUFSIZE], *result;
+
+    do {
+        result = term_gets(str, BUFSIZE);
+        term_puts(str);
+        prtr_puts(str);
+    } while (result != NULL);
 
     /* Go to sleep indefinetely */
     while (1)
