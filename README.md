@@ -1,57 +1,26 @@
-# Hello world configurabile per UARM/UMPS
+# BiKaya OS - Progetto SO A.A. 2019/20
 
-Questa repository contiene un esempio di programma compilabile sia per l'emulatore uMPS2 (https://github.com/tjonjic/umps) che uARM (https://github.com/mellotanica/uARM). 
-I due emulatori offrono librerie ROM e dispositivi mappati in memoria molto simili, per cui ottenere un risultato cross-platform e' relativamente semplice. Tramite delle macro `#ifdef` si includono gli header delle rispettive routine ROM e gli indirizzi dei dispositivi (in questo caso, solo il terminale).
+BiKaya è un sistema operativo realizzato a scopo didattico per gli emulatori
+uARM e uMPS2.
 
-A scopo di esempio sono implementati almeno due possibili metodi per la configurazione dell'architettura: make e scons.
+## Contributing
 
-## Requisiti
+La compilazione del progetto è basata su Make e utlizza, oltre al Makefile contenuto
+nella root directory altri 3 Makefiles siti nella cartella `makefiles`:
+- `base.mk`: contiene tutte le regole per la creazione dei file eseguibili specifici
+per ciascuna architettura. In particolare, compila (senza doverli specificare esplicitamente) tutti i file ```*.c``` presenti all'interno della directory `src`. Per compilare per una specifica architettura è necessario che siano definite le seguenti variabili: 
+* ARCH: `uarm` o `umps`
+* ARCH_PREFIX: il prefisso del nome del pacchetto contenente la toolchain (` arm-none-eabi-` o `mipsel-linux-gnu-`)
+* ARCH_OBJCPY: il nome del tool per generare il file eseguibile dall'emulatore a partire
+dal `.elf`
+* ARCH_OBJS: i nomi dei file addizionali da compilare insieme ai sorgenti (e.g. `lib$(ARCH).o`)
+* ARCH_CFLAGS: flags aggiuntivi da passare a `gcc` (fra cui `-DTARGET_$(ARCH)` per definire le macro necessarie a utilizzare comportamenti diversi a seconda dell'architettura)
+* ARCH_LDSCRIPT: linker script specifico dell'architettura
+- ```uarm.mk```: definisce le variabili di cui sopra per l'emulatore uARM e include il file `base.mk`
+- ```umps.mk```: definisce le variabili di cui sopra per l'emulatore uMPS e include il file `base.mk`
 
-Perche' la compilazione vada a buon fine sono necessari i seguenti pacchetti:
-
-- arm-none-eabi-gcc
-- mipsel-linux-gnu-gcc
-- uarm (per la compilazione su uarm)
-- umps (per la compilazione su umps)
-- make (per utilizzare i makefile)
-- python-scons (per utilizzare SConstruct)
-- python-kconfiglib (per utilizzare SConstruct)
-
-## Make
-
-Molto semplicemente vengono forniti due makefile separati per la compilazione, `uarmmake` e `umpsmake`. Invocando `make uarm` o `make umps2` si procede con la compilazione dell'architettura richiesta.
-
-Dietro le quinte le differenze tra i due makefile sono:
-
- - utilizzo di un compilatore e di flag di compilazione appropriati
- - compilazione di diverse librerie di base
- - inclusione di diversi header
- - definizione delle macro `TARGET_UMPS` o `TARGET_UARM` per ottenere un comportamento diverso (in questo semplice esempio la cosa si riduce all'includere degli header diversi)
-
-## Scons e Kconfig
-
-Scons e' un build tool alternativo a make. Si tratta sostanzialmente di una libreria Python per la gestione di sorgenti. Invocando il comando `scons` viene eseguito lo script `SConstruct`, analogamente al funzionamento di make.
-Usando i parametri `uarm` o `umps` e' possibile differenziare il target a riga di comando in maniera del tutto analoga al funzionamento di make.
-
-```
-$ scons umps
-$ scons uarm
-```
-
-Oltre a questo semplice utilizzo pero' lo script `SConstruct` e' configurato anche per utilizzare il meccanismo di configurazione tipico del kernel Linux, Kconfig.
-Kconfig comporta la definizione di menu di configurazione (i file `Kconfig`) che seguono una sintassi specifica (https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html). Molteplici tool sono poi in grado di leggere questi file e comportarsi di conseguenza o generare degli header che a loro volta influenzino il comportamento dei sorgenti.
-Uno di questi strumenti e' `kconfiglib`, una libreria Python che fornisce sia delle interfacce (grafiche e non) per la modifica della configurazione che delle API per la gestione programmatica di quest'ultima. Essendo un tool in Python scons si puo' interfacciare direttamente a queste API, come viene fatto in questo esempio.
-
-Per installare scons e `kconfiglib` si consiglia di appoggiarsi a un environment virtuale:
-
-```
-$ virtualenv .env
-$ source .env/bin/activate
-$ pip install -r requirements.txt
-```
-
-A questo punto e' possibile editare la configurazione (specificata dal file `Kconfig`) con il comando `guiconfig` o `menuconfig`. Una volta salvata una nuova configurazione lanciando il comando `scons` senza argomenti questa verra' usata per decidere il target di compilazione.
-
-## Esecuzione
-
-Per l'esecuzione dell'esempio fare riferimento ai manuali di uARM e uMPS2, rispettivamente.
+Il `Makefile` di root espone quindi 4 regole per compilare il progetto:
+- `make uarm`: compila il progetto per l'emulatore uARM
+- `make [umps|umps2]`: compila il progetto per l'emulatore uMPS
+- `make`: compila per entrambe le architetture
+- `make clean`: rimuove tutti i file di output dalla cartella `out`

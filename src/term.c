@@ -12,8 +12,6 @@
 #define CHAR_OFFSET 8
 #define TERM_STATUS_MASK 0xFF
 
-#define BUFSIZE 25
-
 static termreg_t *term0_reg = (termreg_t *)DEV_REG_ADDR(IL_TERMINAL, 0);
 
 static unsigned int tx_status(termreg_t *tp) {
@@ -44,6 +42,9 @@ static int term_putchar(char c) {
         return 0;
 }
 
+// It is roughly the same as 'term_putchar' expect that the character
+// received from the terminal is stored into the status field of the
+// receiver side of the terminal.
 static char term_getchar() {
     unsigned int stat;
 
@@ -71,6 +72,15 @@ void term_puts(const char *str) {
             return;
 }
 
+// It reads a string from terminal0 until it founds a new line ('\n')
+// or the number of characters read is equal to size-1 and stores them
+// in a buffer passed as argument by the caller. If new line
+// is not found during first call to the function then successive calls
+// cause term_gets to read more charcters until it eventually gets a
+// new line (it informs the caller when this event happen by returning
+// a NULL pointer instead of a pointer to the buffer passed in).
+// It's also important to note that the buffer passed to the function
+// is always null-terminated.
 char *term_gets(char *buf, int size) {
     int i, len = size - 1;
 

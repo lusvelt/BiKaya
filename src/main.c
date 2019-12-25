@@ -2,7 +2,7 @@
 #include "system.h"
 #include "term.h"
 
-#define BUFSIZE 256
+#define BUFSIZE 10
 
 int main(void) {
     char str[BUFSIZE], *result;

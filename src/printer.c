@@ -8,16 +8,18 @@
 
 static dtpreg_t *printer0 = (dtpreg_t *)DEV_REG_ADDR(IL_PRINTER, 0);
 
+// It writes a character to printer0 by sending a CMD_PRINTCHAR
+// to it (the printer).
 static int prtr_putchar(char c) {
     unsigned int status = printer0->status;
 
-    if (status != ST_READY)
+    if (status != ST_READY)  // Check printer readiness
         return -1;
 
     printer0->data0 = c;
     printer0->command = CMD_PRINTCHR;
 
-    while ((status = printer0->status) == ST_BUSY)
+    while ((status = printer0->status) == ST_BUSY)  // Busy-waiting until command completion
         ;
 
     printer0->command = CMD_ACK;
@@ -25,6 +27,8 @@ static int prtr_putchar(char c) {
     return 0;
 }
 
+// It prints the string passed in one character at a time onto
+// printer0.
 void prtr_puts(const char *str) {
     while (*str)
         if (prtr_putchar(*str++))
