@@ -42,9 +42,11 @@ static int term_putchar(char c) {
         return 0;
 }
 
-// It is roughly the same as 'term_putchar' expect that the character
-// received from the terminal is stored into the status field of the
-// receiver side of the terminal.
+/**
+ * It is roughly the same as 'term_putchar' expect that the character
+ * received from the terminal is stored into the status field of the
+ * receiver side of the terminal.
+ */
 static char term_getchar() {
     unsigned int stat;
 
@@ -72,15 +74,17 @@ void term_puts(const char *str) {
             return;
 }
 
-// It reads a string from terminal0 until it founds a new line ('\n')
-// or the number of characters read is equal to size-1 and stores them
-// in a buffer passed as argument by the caller. If new line
-// is not found during first call to the function then successive calls
-// cause term_gets to read more charcters until it eventually gets a
-// new line (it informs the caller when this event happen by returning
-// a NULL pointer instead of a pointer to the buffer passed in).
-// It's also important to note that the buffer passed to the function
-// is always null-terminated.
+/** 
+ * It reads a string from terminal0 until it founds a new line ('\n')
+ * or the number of characters read is equal to size-1 and stores them
+ * in a buffer passed as argument by the caller. If new line
+ * is not found during first call to the function then successive calls
+ * cause term_gets to read more charcters until it eventually gets a
+ * new line (it informs the caller when this event happen by returning
+ * a NULL pointer instead of a pointer to the buffer passed in).
+ * It's also important to note that the buffer passed to the function
+ * is always null-terminated.
+ */
 char *term_gets(char *buf, int size) {
     int i, len = size - 1;
 
@@ -94,6 +98,6 @@ char *term_gets(char *buf, int size) {
         }
     }
 
-    buf[i + 1] = '\0';
+    buf[i] = '\0';
     return buf;
 }
