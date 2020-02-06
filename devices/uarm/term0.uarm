@@ -1,2 +1,5 @@
-this is uarm
-this is uarm
+Initialized Process Control Blocks   
+ allocPcb test OK   
+ Added 10 entries to the free PCB list   
+So Long and Thanks for All the Fish
+SYSTEM HALTED.

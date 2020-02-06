@@ -250,6 +250,7 @@ int main() {
     addokbuf(" Test process queues module: OK      \n");
 #endif
 
+#ifdef TEST_TREE
     addokbuf(" Testing process trees...\n");
 
     if (!emptyChild(procp[2]))
@@ -319,6 +320,7 @@ int main() {
     freePcb(procp[7]);
     freePcb(procp[8]);
     freePcb(procp[9]);
+#endif
 
 #ifdef TEST_ASL
     /* check ASL */
