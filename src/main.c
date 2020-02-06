@@ -173,7 +173,6 @@ int main() {
 
     addokbuf(" Added 10 entries to the free PCB list   \n");
 
-#ifdef TEST_QUEUE_PROC
     /* Create a 10-element process queue */
     INIT_LIST_HEAD(&qa);
 
@@ -248,7 +247,6 @@ int main() {
 
     addokbuf(" Test insertProcQ(), removeProcQ() and emptyProcQ(): OK   \n");
     addokbuf(" Test process queues module: OK      \n");
-#endif
 
 #ifdef TEST_TREE
     addokbuf(" Testing process trees...\n");

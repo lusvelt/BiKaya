@@ -1,5 +1,10 @@
 Initialized Process Control Blocks   
  allocPcb test OK   
  Added 10 entries to the free PCB list   
+Testing insertProcQ ...   
+Test insertProcQ: OK. Inserted 10 elements 
+ Testing removeProcQ ...   
+ Test insertProcQ(), removeProcQ() and emptyProcQ(): OK   
+ Test process queues module: OK      
 So Long and Thanks for All the Fish
 SYSTEM HALTED.
