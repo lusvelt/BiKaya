@@ -97,13 +97,29 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p) {
 
 /* Tree view functions */
 int emptyChild(pcb_t *this) {
+    return list_empty(&(this->p_child));
 }
 
-void insertChild(pcb_t *prnt, pcb_t *p) {
+void insertChild(pcb_t *parent, pcb_t *p) {
+    list_add(&(p->p_sib), &(parent->p_child));
+    p->p_parent = parent;
 }
 
 pcb_t *removeChild(pcb_t *p) {
+    if (list_empty(&(p->p_child)))
+        return NULL;
+
+    struct list_head *child = list_next(&(p->p_child));
+    list_del(child);
+
+    pcb_t *pcb = container_of(child, pcb_t, p_next);
+    pcb->p_parent = NULL;
+    return pcb;
 }
 
 pcb_t *outChild(pcb_t *p) {
+    if (p->p_parent == NULL)
+        return NULL;
+
+    pcb_t *parent = container_of(&(p->p_parent), pcb_t, p_next);
 }
