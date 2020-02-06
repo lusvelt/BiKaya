@@ -4,24 +4,23 @@
 #include "memset.h"
 
 HIDDEN pcb_t pcbTable[MAXPROC];
-HIDDEN struct list_head *pcbFree;
+HIDDEN LIST_HEAD(pcbFree);
 
 /* PCB free list handling functions */
 void initPcbs(void) {
     int i;
-    INIT_LIST_HEAD(pcbFree);
 
     for (i = 0; i < MAXPROC; i++) {
-        list_add(&(pcbTable[i].p_next), pcbFree);
+        list_add(&(pcbTable[i].p_next), &pcbFree);
     }
 }
 
 void freePcb(pcb_t *p) {
-    list_add(&(p->p_next), pcbFree);
+    list_add(&(p->p_next), &pcbFree);
 }
 
 pcb_t *allocPcb(void) {
-    struct list_head *next = list_next(pcbFree);
+    struct list_head *next = list_next(&pcbFree);
 
     if (next == NULL)
         return NULL;
