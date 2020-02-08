@@ -17,7 +17,7 @@ typedef struct pcb_t {
     struct list_head p_next;
 
     /*process tree fields */
-    struct pcb_t *   p_parent;
+    struct pcb_t *p_parent;
     struct list_head p_child, p_sib;
 
     /* processor state, etc */
@@ -29,8 +29,6 @@ typedef struct pcb_t {
     /* key of the semaphore on which the process is eventually blocked */
     int *p_semkey;
 } pcb_t;
-
-
 
 // Semaphore Descriptor (SEMD) data structure
 typedef struct semd_t {

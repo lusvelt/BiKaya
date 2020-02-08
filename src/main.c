@@ -34,6 +34,7 @@
 
 #include "const.h"
 #include "listx.h"
+#include "term.h"
 
 #ifdef TARGET_UMPS
 #include "umps/arch.h"
@@ -248,7 +249,6 @@ int main() {
     addokbuf(" Test insertProcQ(), removeProcQ() and emptyProcQ(): OK   \n");
     addokbuf(" Test process queues module: OK      \n");
 
-#ifdef TEST_TREE
     addokbuf(" Testing process trees...\n");
 
     if (!emptyChild(procp[2]))
@@ -260,7 +260,7 @@ int main() {
     insertChild(procp[0], procp[2]);
     insertChild(procp[0], procp[3]);
     insertChild(procp[0], procp[7]);
-    addokbuf("Inserted 2 children of pcb0  \n");
+    addokbuf("Inserted 4 children of pcb0  \n");
 
     /* make procp[8],procp[9] children of procp[7] */
     insertChild(procp[7], procp[8]);
@@ -271,7 +271,7 @@ int main() {
         adderrbuf("ERROR: emptyChild(procp[0]): unexpected TRUE   ");
 
     if (emptyChild(procp[7]))
-        adderrbuf("ERROR: emptyChild(procp[0]): unexpected TRUE   ");
+        adderrbuf("ERROR: emptyChild(procp[7]): unexpected TRUE   ");
 
     /* Check outChild */
     q = outChild(procp[1]);
@@ -318,7 +318,6 @@ int main() {
     freePcb(procp[7]);
     freePcb(procp[8]);
     freePcb(procp[9]);
-#endif
 
 #ifdef TEST_ASL
     /* check ASL */

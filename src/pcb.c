@@ -11,9 +11,8 @@ HIDDEN LIST_HEAD(pcbFree);
 void initPcbs(void) {
     int i;
 
-    for (i = 0; i < MAXPROC; i++) {
+    for (i = 0; i < MAXPROC; i++)
         list_add(&(pcbTable[i].p_next), &pcbFree);
-    }
 }
 
 void freePcb(pcb_t *p) {
@@ -101,7 +100,7 @@ int emptyChild(pcb_t *this) {
 }
 
 void insertChild(pcb_t *parent, pcb_t *p) {
-    list_add(&(p->p_sib), &(parent->p_child));
+    list_add_tail(&(p->p_sib), &(parent->p_child));
     p->p_parent = parent;
 }
 
@@ -110,10 +109,14 @@ pcb_t *removeChild(pcb_t *p) {
         return NULL;
 
     struct list_head *child = list_next(&(p->p_child));
+    pcb_t *pcb = container_of(child, pcb_t, p_sib);
+
     list_del(child);
 
-    pcb_t *pcb = container_of(child, pcb_t, p_next);
+    // I'm not so sure we need this because allocPcb()
+    // is responsible for restoring PCB fields
     pcb->p_parent = NULL;
+
     return pcb;
 }
 
@@ -121,5 +124,7 @@ pcb_t *outChild(pcb_t *p) {
     if (p->p_parent == NULL)
         return NULL;
 
-    pcb_t *parent = container_of(&(p->p_parent), pcb_t, p_next);
+    list_del(&(p->p_sib));
+    p->p_parent = NULL;
+    return p;
 }
