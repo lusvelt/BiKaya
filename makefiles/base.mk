@@ -1,3 +1,5 @@
+BUILD_TERM_EXAMPLE := false
+
 # Toolchain
 CC := $(ARCH_PREFIX)gcc
 LD := $(ARCH_PREFIX)ld
@@ -9,7 +11,12 @@ ARCH_DIR := ./$(ARCH)
 BUILD_DIR := ./out/$(ARCH)
 
 # Sources
-SRCS := $(wildcard $(SRC_DIR)/*.c)
+ifeq ($(BUILD_TERM_EXAMPLE), true)
+SRCS := $(filter-out $(SRC_DIR)/main.c, $(wildcard $(SRC_DIR)/*.c))
+else
+SRCS := $(filter-out $(SRC_DIR)/term_example.c, $(wildcard $(SRC_DIR)/*.c))
+endif
+
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS)) 
 OBJS += $(addprefix $(BUILD_DIR)/,$(ARCH_OBJS))
 

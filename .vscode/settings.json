@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "**/uarm/**/*": "plaintext",
-        "**/umps/**/*": "plaintext"
+        "**/umps/**/*": "plaintext",
+        "term.h": "c"
     },
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,

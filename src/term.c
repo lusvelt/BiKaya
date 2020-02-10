@@ -1,3 +1,7 @@
+#include "term.h"
+
+#include <stdarg.h>
+#include "const.h"
 #include "system.h"
 
 #define ST_READY 1
@@ -12,29 +16,24 @@
 #define CHAR_OFFSET 8
 #define TERM_STATUS_MASK 0xFF
 
-static termreg_t *term0_reg = (termreg_t *)DEV_REG_ADDR(IL_TERMINAL, 0);
+#define tx_status(term) ((term->transm_status) & TERM_STATUS_MASK)
+#define rx_status(term) ((term->recv_status) & TERM_STATUS_MASK)
 
-static unsigned int tx_status(termreg_t *tp) {
-    return ((tp->transm_status) & TERM_STATUS_MASK);
-}
+HIDDEN termreg_t *term0 = TERM(0);
 
-static unsigned int rx_status(termreg_t *tp) {
-    return ((tp->recv_status) & TERM_STATUS_MASK);
-}
-
-static int term_putchar(char c) {
+int tputchar(termreg_t *term, int c) {
     unsigned int stat;
 
-    stat = tx_status(term0_reg);
+    stat = tx_status(term);
     if (stat != ST_READY && stat != ST_TRANSMITTED)
         return -1;
 
-    term0_reg->transm_command = ((c << CHAR_OFFSET) | CMD_TRANSMIT);
+    term->transm_command = ((c << CHAR_OFFSET) | CMD_TRANSMIT);
 
-    while ((stat = tx_status(term0_reg)) == ST_BUSY)
+    while ((stat = tx_status(term)) == ST_BUSY)
         ;
 
-    term0_reg->transm_command = CMD_ACK;
+    term->transm_command = CMD_ACK;
 
     if (stat != ST_TRANSMITTED)
         return -1;
@@ -42,25 +41,93 @@ static int term_putchar(char c) {
         return 0;
 }
 
+int putchar(int c) {
+    return tputchar(TERM_0, c);
+}
+
+void tputs(termreg_t *term, const char *str) {
+    while (*str)
+        if (tputchar(term, *str++))
+            return;
+}
+
+void puts(const char *str) {
+    tputs(TERM_0, str);
+}
+
+HIDDEN char *convert(unsigned int num, int base) {
+    const char digits[] = "0123456789ABCDEF";
+    static char buffer[64];
+    static char *ptr;
+
+    ptr = &buffer[63];
+    *ptr = '\0';
+
+    do {
+        *--ptr = digits[num % base];
+        num /= base;
+    } while (num != 0);
+
+    return ptr;
+}
+
+HIDDEN void vtprintf(termreg_t *term, const char *fmt, va_list args) {
+    for (; *fmt; fmt++) {
+        if (*fmt == '%') {
+            switch (*(++fmt)) {
+                case 'c':
+                    tputchar(term, va_arg(args, int));
+                    break;
+                case 'd':
+                    tputs(term, convert(va_arg(args, int), 10));
+                    break;
+                case 's':
+                    tputs(term, va_arg(args, char *));
+                    break;
+                case 'p':
+                    tputs(term, "0x");
+                    tputs(term, convert(va_arg(args, void *), 16));
+                    break;
+            }
+        } else {
+            tputchar(term, *fmt);
+        }
+    }
+}
+
+void tprintf(termreg_t *term, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vtprintf(term, fmt, args);
+    va_end(args);
+}
+
+void printf(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vtprintf(TERM_0, fmt, args);
+    va_end(args);
+}
+
 /**
- * It is roughly the same as 'term_putchar' expect that the character
+ * It is roughly the same as 'term_putchar' except that the character
  * received from the terminal is stored into the status field of the
  * receiver side of the terminal.
  */
-static char term_getchar() {
+int tgetchar(termreg_t *term) {
     unsigned int stat;
 
-    stat = rx_status(term0_reg);
+    stat = rx_status(term);
     if (stat != ST_READY && stat != ST_RECEIVED)
         return -1;
 
-    term0_reg->recv_command = CMD_RECEIVE;
+    term->recv_command = CMD_RECEIVE;
 
-    while ((stat = rx_status(term0_reg)) == ST_BUSY)
+    while ((stat = rx_status(term)) == ST_BUSY)
         ;
 
-    char c = term0_reg->recv_status >> CHAR_OFFSET;
-    term0_reg->recv_command = CMD_ACK;
+    char c = term->recv_status >> CHAR_OFFSET;
+    term->recv_command = CMD_ACK;
 
     if (stat != ST_RECEIVED)
         return -1;
@@ -68,10 +135,8 @@ static char term_getchar() {
         return c;
 }
 
-void term_puts(const char *str) {
-    while (*str)
-        if (term_putchar(*str++))
-            return;
+int getchar(void) {
+    return tgetchar(TERM_0);
 }
 
 /** 
@@ -85,11 +150,11 @@ void term_puts(const char *str) {
  * It's also important to note that the buffer passed to the function
  * is always null-terminated.
  */
-char *term_gets(char *buf, int size) {
+char *tgets(termreg_t *term, char *buf, int size) {
     int i, len = size - 1;
 
     for (i = 0; i < len; i++) {
-        char c = term_getchar();
+        char c = tgetchar(term);
         buf[i] = c;
 
         if (c == '\n') {
@@ -100,4 +165,8 @@ char *term_gets(char *buf, int size) {
 
     buf[i] = '\0';
     return buf;
+}
+
+char *gets(char *buf, int size) {
+    return tgets(TERM_0, buf, size);
 }
