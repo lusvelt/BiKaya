@@ -1,6 +1,7 @@
 #include "term.h"
 
 #include <stdarg.h>
+#include <stdint.h>
 #include "const.h"
 #include "system.h"
 
@@ -22,7 +23,7 @@
 HIDDEN termreg_t *term0 = TERM(0);
 
 int tputchar(termreg_t *term, int c) {
-    unsigned int stat;
+    uint32_t stat;
 
     stat = tx_status(term);
     if (stat != ST_READY && stat != ST_TRANSMITTED)
@@ -41,21 +42,13 @@ int tputchar(termreg_t *term, int c) {
         return 0;
 }
 
-int putchar(int c) {
-    return tputchar(TERM_0, c);
-}
-
 void tputs(termreg_t *term, const char *str) {
     while (*str)
         if (tputchar(term, *str++))
             return;
 }
 
-void puts(const char *str) {
-    tputs(TERM_0, str);
-}
-
-HIDDEN char *convert(unsigned int num, int base) {
+HIDDEN char *convert(uint32_t num, int base) {
     const char digits[] = "0123456789ABCDEF";
     static char buffer[64];
     static char *ptr;
@@ -86,7 +79,7 @@ HIDDEN void vtprintf(termreg_t *term, const char *fmt, va_list args) {
                     break;
                 case 'p':
                     tputs(term, "0x");
-                    tputs(term, convert(va_arg(args, void *), 16));
+                    tputs(term, convert((uint32_t)va_arg(args, void *), 16));
                     break;
             }
         } else {
@@ -102,20 +95,13 @@ void tprintf(termreg_t *term, const char *fmt, ...) {
     va_end(args);
 }
 
-void printf(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    vtprintf(TERM_0, fmt, args);
-    va_end(args);
-}
-
 /**
  * It is roughly the same as 'term_putchar' except that the character
  * received from the terminal is stored into the status field of the
  * receiver side of the terminal.
  */
 int tgetchar(termreg_t *term) {
-    unsigned int stat;
+    uint32_t stat;
 
     stat = rx_status(term);
     if (stat != ST_READY && stat != ST_RECEIVED)
@@ -133,10 +119,6 @@ int tgetchar(termreg_t *term) {
         return -1;
     else
         return c;
-}
-
-int getchar(void) {
-    return tgetchar(TERM_0);
 }
 
 /** 
@@ -165,8 +147,4 @@ char *tgets(termreg_t *term, char *buf, int size) {
 
     buf[i] = '\0';
     return buf;
-}
-
-char *gets(char *buf, int size) {
-    return tgets(TERM_0, buf, size);
 }

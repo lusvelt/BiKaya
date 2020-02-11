@@ -1,4 +1,4 @@
-BUILD_TERM_EXAMPLE := false
+BUILD_TERM_EXAMPLE := true
 
 # Toolchain
 CC := $(ARCH_PREFIX)gcc
