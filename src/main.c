@@ -319,7 +319,6 @@ int main() {
     freePcb(procp[8]);
     freePcb(procp[9]);
 
-#ifdef TEST_ASL
     /* check ASL */
     initASL();
     addokbuf("Initializing active semaphore list   \n");
@@ -338,7 +337,7 @@ int main() {
         if (insertBlocked(&sem[i], procp[i]))
             adderrbuf("ERROR:insertBlocked() test #2: unexpected TRUE   ");
     }
-
+#ifdef NOT_DEF
     /* check if semaphore descriptors are returned to the free list */
     p = removeBlocked(&sem[11]);
     if (insertBlocked(&sem[11], p))
@@ -398,7 +397,6 @@ int main() {
 
     addokbuf("ASL module OK   \n");
 #endif
-
     addokbuf("So Long and Thanks for All the Fish\n");
 
     return 0;
