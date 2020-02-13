@@ -337,9 +337,10 @@ int main(void) {
         if (insertBlocked(&sem[i], procp[i]))
             adderrbuf("ERROR:insertBlocked() test #2: unexpected TRUE   ");
     }
-#ifdef NOT_DEF
+
     /* check if semaphore descriptors are returned to the free list */
     p = removeBlocked(&sem[11]);
+    println("Hello world");
     if (insertBlocked(&sem[11], p))
         adderrbuf("ERROR: removeBlocked(): fails to return to free list   ");
 
@@ -360,6 +361,7 @@ int main(void) {
 
     addokbuf("Test insertBlocked() and removeBlocked() ok   \n");
 
+#ifdef NOT_DEF
     if (headBlocked(&sem[11]) != NULL)
         adderrbuf("ERROR: headBlocked(): nonNULL for a nonexistent queue   ");
 

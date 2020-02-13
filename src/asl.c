@@ -2,6 +2,7 @@
 
 #include "const.h"
 #include "listx.h"
+#include "term.h"
 #include "types_bikaya.h"
 
 HIDDEN semd_t semd_table[MAXPROC];
@@ -12,7 +13,7 @@ HIDDEN LIST_HEAD(asl);
 semd_t *getSemd(int *key) {
     semd_t *it;
     list_for_each_entry(it, &asl, s_next) {
-        if (it->s_key == *key)
+        if (it->s_key == key)
             return it;
     }
     return NULL;
@@ -20,7 +21,9 @@ semd_t *getSemd(int *key) {
 
 void initASL() {
     for (int i = 0; i < MAXPROC; i++) {
-        semd_table[i].s_key = 0;
+        semd_table[i].s_key = NULL;
+        INIT_LIST_HEAD(&semd_table[i].s_procQ);
+
         list_add(&semd_table[i].s_next, &semdFree);
     }
 }
@@ -44,6 +47,7 @@ pcb_t *removeBlocked(int *key) {
     semd_t *semd = getSemd(key);
     if (semd == NULL)
         return NULL;
+
     struct list_head *p_h = list_next(&semd->s_procQ);
     pcb_t *p = container_of(p_h, pcb_t, p_next);
     list_del(p_h);
