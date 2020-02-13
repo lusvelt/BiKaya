@@ -151,7 +151,7 @@ void adderrbuf(char *strp) {
  * Main Test File
  ******************************************************************************/
 
-int main() {
+int main(void) {
     int i;
 
     initPcbs();

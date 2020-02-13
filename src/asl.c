@@ -18,6 +18,13 @@ semd_t *getSemd(int *key) {
     return NULL;
 }
 
+void initASL() {
+    for (int i = 0; i < MAXPROC; i++) {
+        semd_table[i].s_key = 0;
+        list_add(&semd_table[i].s_next, &semdFree);
+    }
+}
+
 int insertBlocked(int *key, pcb_t *p) {
     semd_t *semd = getSemd(key);
     if (semd == NULL) {

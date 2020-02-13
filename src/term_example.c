@@ -9,6 +9,7 @@
  * while the others don't. So, prefixed functions could be used to print
  * to any terminal while unprefixed ones default to terminal 0.
  */
+
 int main(void) {
     // To get a terminal instance you can use TERM(number) macro
     termreg_t *term1 = TERM(1);
