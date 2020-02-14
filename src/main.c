@@ -340,7 +340,6 @@ int main(void) {
 
     /* check if semaphore descriptors are returned to the free list */
     p = removeBlocked(&sem[11]);
-    println("Hello world");
     if (insertBlocked(&sem[11], p))
         adderrbuf("ERROR: removeBlocked(): fails to return to free list   ");
 
@@ -361,7 +360,6 @@ int main(void) {
 
     addokbuf("Test insertBlocked() and removeBlocked() ok   \n");
 
-#ifdef NOT_DEF
     if (headBlocked(&sem[11]) != NULL)
         adderrbuf("ERROR: headBlocked(): nonNULL for a nonexistent queue   ");
 
@@ -369,6 +367,7 @@ int main(void) {
         adderrbuf("ERROR: headBlocked(1): NULL for an existent queue   ");
     if (q != procp[9])
         adderrbuf("ERROR: headBlocked(1): wrong process returned   ");
+
     p = outBlocked(q);
     if (p != q)
         adderrbuf("ERROR: outBlocked(1): couldn't remove from valid queue   ");
@@ -398,7 +397,6 @@ int main(void) {
     addokbuf("Test headBlocked() and outBlocked(): OK   \n");
 
     addokbuf("ASL module OK   \n");
-#endif
     addokbuf("So Long and Thanks for All the Fish\n");
 
     return 0;

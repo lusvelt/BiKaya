@@ -15,8 +15,6 @@ Testing process tree module OK
 Initializing active semaphore list   
  Test insertBlocked(): test #1 started  
 Test insertBlocked(): test #2 started  
-Hello world
 Test removeBlocked(): test started   
 Test insertBlocked() and removeBlocked() ok   
-So Long and Thanks for All the Fish
-SYSTEM HALTED.
+ERROR: outChildBlocked(): nonNULL for a nonexistent queue (1)  KERNEL PANIC!

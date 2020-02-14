@@ -1,6 +1,8 @@
 #ifndef _CONST_H
 #define _CONST_H
 
+#include <stdint.h>
+
 /**************************************************************************** 
  *
  * This header file contains the global constant & macro definitions.
@@ -23,5 +25,7 @@
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 
 #define CR 0x0a /* carriage return as returned by the terminal */
+
+typedef uint8_t bool;
 
 #endif

@@ -40,6 +40,7 @@ int insertBlocked(int *key, pcb_t *p) {
 
     semd->s_key = key;
     list_add_tail(&p->p_next, &semd->s_procQ);
+    p->p_semkey = key;
     return FALSE;
 }
 
@@ -55,11 +56,47 @@ pcb_t *removeBlocked(int *key) {
         list_del(&semd->s_next);
         list_add(&semd->s_next, &semdFree);
     }
+    p->p_semkey = NULL;
     return p;
 }
 
-pcb_t *outBlocked(pcb_t *p) {}
+pcb_t *outBlocked(pcb_t *p) {
+    semd_t *semd = getSemd(p->p_semkey);
+    if (semd == NULL) return NULL;
+    bool found = FALSE;
+    pcb_t *it;
+    list_for_each_entry(it, &semd->s_procQ, p_next) {
+        if (p == it) {
+            found = TRUE;
+            break;
+        }
+    }
+    if (!found) return NULL;
 
-pcb_t *headBlocked(int *key) {}
+    list_del(&it->p_next);
 
-void outChildBlocked(pcb_t *p) {}
+    if (list_empty(&semd->s_procQ)) {
+        list_del(&semd->s_next);
+        list_add(&semd->s_next, &semdFree);
+    }
+
+    return p;
+}
+
+pcb_t *headBlocked(int *key) {
+    semd_t *semd = getSemd(key);
+    if (semd == NULL || list_empty(&semd->s_procQ)) return NULL;
+
+    return container_of(list_next(&semd->s_procQ), pcb_t, p_next);
+}
+
+void outChildBlocked(pcb_t *p) {
+    semd_t *semd = getSemd(p->p_semkey);
+    pcb_t *it;
+    list_for_each_entry(it, &semd->s_procQ, p_next) {
+        if (p->p_parent == p) {
+            list_del(&it->p_next);
+        }
+    }
+    outBlocked(p);
+}
