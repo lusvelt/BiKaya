@@ -1,12 +1,12 @@
-/*! \file */
 #include "pcb.h"
 
 #include "const.h"
 #include "memset.h"
 #include "term.h"
 
+//only relevant to this file, so HIDDEN (static)
 HIDDEN pcb_t pcbTable[MAXPROC];
-HIDDEN LIST_HEAD(pcbFree);
+HIDDEN LIST_HEAD(pcbFree);  //dummy
 
 /* PCB free list handling functions */
 void initPcbs(void) {
@@ -19,7 +19,7 @@ void initPcbs(void) {
 /*! 
  * \brief Returns a PCB to the free list.
  * 
- * It returns a previously allococated PCB to the list
+ * It returns a previously allocated PCB to the list
  * of unallocated ones.
  * \param p pointer to the PCB to deallocate
  */
@@ -36,12 +36,16 @@ pcb_t *allocPcb(void) {
     list_del(next);
     pcb_t *pcb = container_of(next, pcb_t, p_next);
 
+    //initialize fields
     INIT_LIST_HEAD(&(pcb->p_child));
     INIT_LIST_HEAD(&(pcb->p_next));
     INIT_LIST_HEAD(&(pcb->p_sib));
     pcb->p_parent = NULL;
     pcb->p_semkey = NULL;
     pcb->priority = 0;
+    // this {0} is interpreted by compiler as
+    // memset(&pcb->p_s,0,sizeof(state_t)),
+    // hence the inclusion of memset.h
     pcb->p_s = (state_t){0};
 
     return pcb;
@@ -64,6 +68,7 @@ void insertProcQ(struct list_head *head, pcb_t *p) {
 
     struct pcb_t *it;
     list_for_each_entry(it, head, p_next) {
+        // continue until correct priority reached
         if (it->priority < p->priority) {
             list_add_tail(&(p->p_next), &(it->p_next));
             return;
@@ -121,8 +126,8 @@ pcb_t *removeChild(pcb_t *p) {
 
     list_del(child);
 
-    // I'm not so sure we need this because allocPcb()
-    // is responsible for restoring PCB fields
+    // only for clarity, as allocPcb() is responsible
+    // for restoring fields
     pcb->p_parent = NULL;
 
     return pcb;
