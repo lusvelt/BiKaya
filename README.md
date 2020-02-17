@@ -3,6 +3,14 @@
 BiKaya è un sistema operativo realizzato a scopo didattico per gli emulatori
 uARM e uMPS2.
 
+## Documentation
+
+La documentazione del progetto è generabile tramite il tool [Doxygen](http://www.doxygen.nl/) eseguendo
+```bash
+doxygen Doxyfile
+```
+nella root directory del progetto. L'output generato, in formato Latex e HTML, viene posto nella cartella `docs`.
+
 ## Contributing
 
 La compilazione del progetto è basata su Make e utlizza, oltre al Makefile contenuto

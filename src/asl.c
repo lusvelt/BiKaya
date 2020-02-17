@@ -2,14 +2,13 @@
 
 #include "const.h"
 #include "listx.h"
-#include "term.h"
+#include "pcb.h"
 #include "types_bikaya.h"
 
-HIDDEN semd_t semd_table[MAXPROC];
-HIDDEN LIST_HEAD(semdFree);
-HIDDEN LIST_HEAD(asl);
+HIDDEN semd_t semdTable[MAXPROC];
+HIDDEN LIST_HEAD(semdFree);  // Dummy element of semd free list
+HIDDEN LIST_HEAD(asl);       // Dummy element of Active Semaphore List
 
-/* ASL handling functions */
 semd_t *getSemd(int *key) {
     semd_t *it;
     list_for_each_entry(it, &asl, s_next) {
@@ -21,14 +20,14 @@ semd_t *getSemd(int *key) {
 
 void initASL() {
     for (int i = 0; i < MAXPROC; i++) {
-        semd_table[i].s_key = NULL;
-        INIT_LIST_HEAD(&semd_table[i].s_procQ);
+        semdTable[i].s_key = NULL;
+        INIT_LIST_HEAD(&semdTable[i].s_procQ);
 
-        list_add(&semd_table[i].s_next, &semdFree);
+        list_add(&semdTable[i].s_next, &semdFree);
     }
 }
 
-int insertBlocked(int *key, pcb_t *p) {
+bool insertBlocked(int *key, pcb_t *p) {
     semd_t *semd = getSemd(key);
     if (semd == NULL) {
         if (list_empty(&semdFree))
@@ -38,8 +37,11 @@ int insertBlocked(int *key, pcb_t *p) {
         list_add(&semd->s_next, &asl);
     }
 
+    // API given does not specify a policy for the insertion of a PCB
+    // in a semaphore queue. So, we decide to use insertProcQ and
+    // handling semaphore queues like processes queues.
+    insertProcQ(&semd->s_procQ, p);
     semd->s_key = key;
-    list_add_tail(&p->p_next, &semd->s_procQ);
     p->p_semkey = key;
     return FALSE;
 }
@@ -49,20 +51,25 @@ pcb_t *removeBlocked(int *key) {
     if (semd == NULL)
         return NULL;
 
-    struct list_head *p_h = list_next(&semd->s_procQ);
-    pcb_t *p = container_of(p_h, pcb_t, p_next);
-    list_del(p_h);
+    struct list_head *elem = list_next(&semd->s_procQ);
+    pcb_t *pcb = container_of(elem, pcb_t, p_next);
+    list_del(elem);
+
     if (list_empty(&semd->s_procQ)) {
         list_del(&semd->s_next);
-        list_add(&semd->s_next, &semdFree);
+        list_add(&semd->s_next, &semdFree);  // We return the semaphore to the free list
     }
-    p->p_semkey = NULL;
-    return p;
+
+    pcb->p_semkey = NULL;
+    return pcb;
 }
 
 pcb_t *outBlocked(pcb_t *p) {
     semd_t *semd = getSemd(p->p_semkey);
-    if (semd == NULL) return NULL;
+    if (semd == NULL) {
+        // PCB passed as input does not exist on the given semaphore queue
+        return NULL;
+    }
 
     pcb_t *it;
     bool found = FALSE;

@@ -1,6 +1,9 @@
+/*! \file */
 #ifndef PCB_H
 #define PCB_H
-#include <types_bikaya.h>
+
+#include "const.h"
+#include "types_bikaya.h"
 
 /*! 
  * \brief Initializes pcbFree list.

@@ -4,9 +4,9 @@
 #include "memset.h"
 #include "term.h"
 
-//only relevant to this file, so HIDDEN (static)
+// only relevant to this file, so HIDDEN (static)
 HIDDEN pcb_t pcbTable[MAXPROC];
-HIDDEN LIST_HEAD(pcbFree);  //dummy
+HIDDEN LIST_HEAD(pcbFree);  // dummy
 
 /* PCB free list handling functions */
 void initPcbs(void) {

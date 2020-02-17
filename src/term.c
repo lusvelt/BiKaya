@@ -20,8 +20,6 @@
 #define tx_status(term) ((term->transm_status) & TERM_STATUS_MASK)
 #define rx_status(term) ((term->recv_status) & TERM_STATUS_MASK)
 
-HIDDEN termreg_t *term0 = TERM(0);
-
 int tputchar(termreg_t *term, int c) {
     uint32_t stat;
 
