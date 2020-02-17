@@ -40,7 +40,7 @@ bool insertBlocked(int *key, pcb_t *p) {
     // API given does not specify a policy for the insertion of a PCB
     // in a semaphore queue. So, we decide to use insertProcQ and
     // handling semaphore queues like processes queues.
-    insertProcQ(&p->p_next, &semd->s_procQ);
+    insertProcQ(&semd->s_procQ, p);
     semd->s_key = key;
     p->p_semkey = key;
     return FALSE;
