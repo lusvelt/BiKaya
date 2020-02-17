@@ -5,7 +5,7 @@
 #include "pcb.h"
 #include "types_bikaya.h"
 
-HIDDEN semd_t semd_table[MAXPROC];
+HIDDEN semd_t semdTable[MAXPROC];
 HIDDEN LIST_HEAD(semdFree);  // Dummy element of semd free list
 HIDDEN LIST_HEAD(asl);       // Dummy element of Active Semaphore List
 
@@ -20,14 +20,14 @@ semd_t *getSemd(int *key) {
 
 void initASL() {
     for (int i = 0; i < MAXPROC; i++) {
-        semd_table[i].s_key = NULL;
-        INIT_LIST_HEAD(&semd_table[i].s_procQ);
+        semdTable[i].s_key = NULL;
+        INIT_LIST_HEAD(&semdTable[i].s_procQ);
 
-        list_add(&semd_table[i].s_next, &semdFree);
+        list_add(&semdTable[i].s_next, &semdFree);
     }
 }
 
-int insertBlocked(int *key, pcb_t *p) {
+bool insertBlocked(int *key, pcb_t *p) {
     semd_t *semd = getSemd(key);
     if (semd == NULL) {
         if (list_empty(&semdFree))
