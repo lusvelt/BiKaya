@@ -16,13 +16,6 @@ void initPcbs(void) {
         list_add(&(pcbTable[i].p_next), &pcbFree);
 }
 
-/*! 
- * \brief Returns a PCB to the free list.
- * 
- * It returns a previously allococated PCB to the list
- * of unallocated ones.
- * \param p pointer to the PCB to deallocate
- */
 void freePcb(pcb_t *p) {
     list_add(&(p->p_next), &pcbFree);
 }
@@ -52,7 +45,7 @@ void mkEmptyProcQ(struct list_head *head) {
     INIT_LIST_HEAD(head);
 }
 
-int emptyProcQ(struct list_head *head) {
+bool emptyProcQ(struct list_head *head) {
     return list_empty(head);
 }
 
@@ -103,7 +96,7 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p) {
 }
 
 /* Tree view functions */
-int emptyChild(pcb_t *this) {
+bool emptyChild(pcb_t *this) {
     return list_empty(&(this->p_child));
 }
 
