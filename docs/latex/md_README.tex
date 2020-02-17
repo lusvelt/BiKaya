@@ -1,0 +1,23 @@
+Bi\+Kaya è un sistema operativo realizzato a scopo didattico per gli emulatori u\+A\+RM e u\+M\+P\+S2.\hypertarget{md_README_autotoc_md1}{}\doxysection{Contributing}\label{md_README_autotoc_md1}
+La compilazione del progetto è basata su Make e utlizza, oltre al Makefile contenuto nella root directory altri 3 Makefiles siti nella cartella {\ttfamily makefiles}\+:
+\begin{DoxyItemize}
+\item {\ttfamily base.\+mk}\+: contiene tutte le regole per la creazione dei file eseguibili specifici per ciascuna architettura. In particolare, compila (senza doverli specificare esplicitamente) tutti i file {\ttfamily $\ast$.c} presenti all\textquotesingle{}interno della directory {\ttfamily src}. Per compilare per una specifica architettura è necessario che siano definite le seguenti variabili\+:
+\begin{DoxyItemize}
+\item {\ttfamily A\+R\+CH}\+: {\ttfamily uarm} o {\ttfamily umps}
+\item {\ttfamily A\+R\+C\+H\+\_\+\+P\+R\+E\+F\+IX}\+: il prefisso del nome del pacchetto contenente la toolchain ({\ttfamily arm-\/none-\/eabi-\/} o {\ttfamily mipsel-\/linux-\/gnu-\/})
+\item {\ttfamily A\+R\+C\+H\+\_\+\+O\+B\+J\+C\+PY}\+: il nome del tool per generare il file eseguibile dall\textquotesingle{}emulatore a partire dal {\ttfamily .elf}
+\item {\ttfamily A\+R\+C\+H\+\_\+\+O\+B\+JS}\+: i nomi dei file addizionali da compilare insieme ai sorgenti (e.\+g. {\ttfamily lib.o})
+\item {\ttfamily A\+R\+C\+H\+\_\+\+C\+F\+L\+A\+GS}\+: flags aggiuntivi da passare a {\ttfamily gcc} (fra cui {\ttfamily -\/D\+T\+A\+R\+G\+E\+T\+\_\+} per definire le macro necessarie a utilizzare comportamenti diversi a seconda dell\textquotesingle{}architettura)
+\item {\ttfamily A\+R\+C\+H\+\_\+\+L\+D\+S\+C\+R\+I\+PT}\+: linker script specifico dell\textquotesingle{}architettura
+\end{DoxyItemize}
+\item {\ttfamily uarm.\+mk}\+: definisce le variabili di cui sopra per l\textquotesingle{}emulatore u\+A\+RM e include il file {\ttfamily base.\+mk}
+\item {\ttfamily umps.\+mk}\+: definisce le variabili di cui sopra per l\textquotesingle{}emulatore u\+M\+PS e include il file {\ttfamily base.\+mk}
+\end{DoxyItemize}
+
+Il {\ttfamily Makefile} di root espone quindi 4 regole per compilare il progetto\+:
+\begin{DoxyItemize}
+\item {\ttfamily make uarm}\+: compila il progetto per l\textquotesingle{}emulatore u\+A\+RM
+\item {\ttfamily make \mbox{[}umps$\vert$umps2\mbox{]}}\+: compila il progetto per l\textquotesingle{}emulatore u\+M\+PS
+\item {\ttfamily make}\+: compila per entrambe le architetture
+\item {\ttfamily make clean}\+: rimuove tutti i file di output dalla cartella {\ttfamily out} 
+\end{DoxyItemize}

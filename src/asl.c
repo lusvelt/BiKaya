@@ -63,14 +63,16 @@ pcb_t *removeBlocked(int *key) {
 pcb_t *outBlocked(pcb_t *p) {
     semd_t *semd = getSemd(p->p_semkey);
     if (semd == NULL) return NULL;
-    bool found = FALSE;
+
     pcb_t *it;
+    bool found = FALSE;
     list_for_each_entry(it, &semd->s_procQ, p_next) {
         if (p == it) {
             found = TRUE;
             break;
         }
     }
+
     if (!found) return NULL;
 
     list_del(&it->p_next);
@@ -92,11 +94,12 @@ pcb_t *headBlocked(int *key) {
 
 void outChildBlocked(pcb_t *p) {
     semd_t *semd = getSemd(p->p_semkey);
+    if (semd == NULL) return;
+
     pcb_t *it;
-    list_for_each_entry(it, &semd->s_procQ, p_next) {
-        if (p->p_parent == p) {
-            list_del(&it->p_next);
-        }
+    list_for_each_entry(it, &p->p_child, p_sib) {
+        outChildBlocked(it);
     }
+
     outBlocked(p);
 }

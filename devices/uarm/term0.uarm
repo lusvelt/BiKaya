@@ -17,4 +17,7 @@ Initializing active semaphore list
 Test insertBlocked(): test #2 started  
 Test removeBlocked(): test started   
 Test insertBlocked() and removeBlocked() ok   
-ERROR: outChildBlocked(): nonNULL for a nonexistent queue (1)  KERNEL PANIC!
+Test headBlocked() and outBlocked(): OK   
+ASL module OK   
+So Long and Thanks for All the Fish
+SYSTEM HALTED.
