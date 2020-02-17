@@ -398,6 +398,7 @@ int main(void) {
 
     addokbuf("ASL module OK   \n");
     addokbuf("So Long and Thanks for All the Fish\n");
+    addokbuf("So Sad that It Should Come to This \n");
 
     return 0;
 }
