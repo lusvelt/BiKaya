@@ -2,11 +2,17 @@
 #define PCB_H
 #include <types_bikaya.h>
 
-/* PCB handling functions */
-
-/* PCB free list handling functions */
 void initPcbs(void);
+
+/*! 
+ * \brief Returns a PCB to the free list.
+ * 
+ * It returns a previously allococated PCB to the list
+ * of unallocated ones.
+ * \param p pointer to the PCB to deallocate
+ */
 void freePcb(pcb_t *p);
+
 pcb_t *allocPcb(void);
 
 /* PCB queue handling functions */
