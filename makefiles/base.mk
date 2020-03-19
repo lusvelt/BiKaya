@@ -7,11 +7,19 @@ SRC_DIR := ./src
 INCLUDE_DIR := ./include
 ARCH_DIR := ./$(ARCH)
 BUILD_DIR := ./out/$(ARCH)
+TEST_DIR := ./tests
 
 # Sources
-SRCS := $(wildcard $(SRC_DIR)/*.c) ./tests/p1.5test_bikaya_v0.c
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+ifdef TEST
+	SRCS += $(TEST_DIR)/p1.5test_bikaya_v0.c
+endif
+
+# Objects
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
-OBJS := $(patsubst ./tests/%.c,$(BUILD_DIR)/%.o, $(OBJS))
+ifdef TEST
+	OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o, $(OBJS))
+endif
 OBJS += $(addprefix $(BUILD_DIR)/,$(ARCH_OBJS))
 
 # Compiler options
@@ -39,7 +47,7 @@ $(KERNEL): $(OBJS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BUILD_DIR)/%.o: ./tests/%.c
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.o: $(ARCH_DIR)/%.s

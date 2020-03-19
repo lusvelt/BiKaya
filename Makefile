@@ -1,7 +1,13 @@
 
-all:
-	$(MAKE) -f makefiles/umps.mk
-	$(MAKE) -f makefiles/uarm.mk
+all: uarm umps
+
+test: test-uarm test-umps
+
+test-uarm:
+	$(MAKE) -f makefiles/uarm.mk TEST=1
+
+test-umps:
+	$(MAKE) -f makefiles/umps.mk TEST=1
 
 umps:
 	$(MAKE) -f makefiles/umps.mk
@@ -16,7 +22,4 @@ clean:
 	$(MAKE) -f makefiles/umps.mk clean
 	$(MAKE) -f makefiles/uarm.mk clean
 
-print:
-	$(MAKE) -f makefiles/uarm.mk print
-
-.PHONY: umps umps2 uarm clean all print
+.PHONY: umps umps2 uarm clean test all

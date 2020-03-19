@@ -1,4 +1,5 @@
 #include "init.h"
+#include "term.h"
 #include "utils.h"
 
 extern void test1();
