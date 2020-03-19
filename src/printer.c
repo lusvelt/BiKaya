@@ -6,13 +6,13 @@
 #define CMD_ACK 1
 #define CMD_PRINTCHR 2
 
-static dtpreg_t *printer0 = (dtpreg_t *)DEV_REG_ADDR(IL_PRINTER, 0);
+HIDDEN dtpreg_t *printer0 = (dtpreg_t *)DEV_REG_ADDR(IL_PRINTER, 0);
 
 /**
  * It writes a character to printer0 by sending a CMD_PRINTCHAR
  * to it (the printer).
  */
-static int prtr_putchar(char c) {
+HIDDEN int prtr_putchar(char c) {
     unsigned int status = printer0->status;
 
     if (status != ST_READY) /* Check printer readiness */

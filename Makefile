@@ -16,4 +16,7 @@ clean:
 	$(MAKE) -f makefiles/umps.mk clean
 	$(MAKE) -f makefiles/uarm.mk clean
 
-.PHONY: umps umps2 uarm clean all
+print:
+	$(MAKE) -f makefiles/uarm.mk print
+
+.PHONY: umps umps2 uarm clean all print

@@ -9,8 +9,9 @@ ARCH_DIR := ./$(ARCH)
 BUILD_DIR := ./out/$(ARCH)
 
 # Sources
-SRCS := $(wildcard $(SRC_DIR)/*.c)
-OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS)) 
+SRCS := $(wildcard $(SRC_DIR)/*.c) ./tests/p1.5test_bikaya_v0.c
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
+OBJS := $(patsubst ./tests/%.c,$(BUILD_DIR)/%.o, $(OBJS))
 OBJS += $(addprefix $(BUILD_DIR)/,$(ARCH_OBJS))
 
 # Compiler options
@@ -25,7 +26,7 @@ VPATH := $(ARCH_DIR)
 TARGET := kernel.core.$(ARCH)
 KERNEL := $(BUILD_DIR)/kernel
 
-.PHONY: all clean
+.PHONY: all clean print
 
 all: $(TARGET)
 
@@ -36,6 +37,9 @@ $(KERNEL): $(OBJS)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%.o: ./tests/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.o: $(ARCH_DIR)/%.s

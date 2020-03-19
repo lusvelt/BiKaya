@@ -10,3 +10,4 @@
 #endif
 
 #include "const.h"
+#include "types_bikaya.h"
