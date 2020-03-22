@@ -1,4 +1,5 @@
 #include "init.h"
+#include "scheduler.h"
 #include "term.h"
 #include "utils.h"
 
@@ -10,6 +11,6 @@ int main(void) {
     init();
 
     createPcb(test1, 1);
-    createPcb(test2, 2);
-    createPcb(test3, 3);
+
+    start();
 }

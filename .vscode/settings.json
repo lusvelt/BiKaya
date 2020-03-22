@@ -3,7 +3,9 @@
         "**/uarm/**/*": "plaintext",
         "**/umps/**/*": "plaintext",
         "term.h": "c",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "scheduler.h": "c",
+        "sstream": "c"
     },
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
