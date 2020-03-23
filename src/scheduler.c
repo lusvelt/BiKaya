@@ -3,7 +3,7 @@
 #include "const.h"
 #include "listx.h"
 #include "system.h"
-#include "term.h"
+#include "terminal.h"
 
 extern void test1();
 

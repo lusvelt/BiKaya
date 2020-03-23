@@ -1,6 +1,6 @@
 #include "init.h"
 #include "scheduler.h"
-#include "term.h"
+#include "terminal.h"
 #include "utils.h"
 
 extern void test1();
@@ -13,4 +13,5 @@ int main(void) {
     createPcb(test1, 1);
 
     start();
+    return 0;
 }

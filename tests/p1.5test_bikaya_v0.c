@@ -1,5 +1,6 @@
 #include "const.h"
 #include "listx.h"
+#include "terminal.h"
 #ifdef TARGET_UMPS
 #include "umps/arch.h"
 #include "umps/libumps.h"
@@ -78,7 +79,10 @@ void termprint(char *str) {
 }
 #endif
 #ifdef TARGET_UARM
-#define termprint(str) tprint(str);
+// #define termprint(str) tprint(str);
+void termprint(char *str) {
+    tprint(str);
+}
 #endif
 
 char *toprint[] = {

@@ -3,7 +3,7 @@
 #define ASL_H
 
 #include "const.h"
-#include "types_bikaya.h"
+#include "types.h"
 
 /*!
  * \brief Get the semd associated with the given key

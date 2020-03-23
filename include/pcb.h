@@ -3,7 +3,7 @@
 #define PCB_H
 
 #include "const.h"
-#include "types_bikaya.h"
+#include "types.h"
 
 /*! 
  * \brief Initializes pcbFree list.

@@ -2,7 +2,7 @@
 
 #include "const.h"
 #include "memset.h"
-#include "term.h"
+#include "terminal.h"
 
 // only relevant to this file, so HIDDEN (static)
 HIDDEN pcb_t pcbTable[MAXPROC];

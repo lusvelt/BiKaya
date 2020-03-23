@@ -2,7 +2,7 @@
     "files.associations": {
         "**/uarm/**/*": "plaintext",
         "**/umps/**/*": "plaintext",
-        "term.h": "c",
+        "terminal.h": "c",
         "cstdint": "cpp",
         "scheduler.h": "c",
         "sstream": "c"
