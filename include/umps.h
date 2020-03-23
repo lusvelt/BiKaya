@@ -34,6 +34,9 @@
 #define STATUS_ENABLE_INT(status) ((status) | (STATUS_ID_MASK & ~STATUS_TIMER_ID))
 #define STATUS_DISABLE_INT(status) ((status) & ~(STATUS_ID_MASK & ~STATUS_TIMER_ID))
 
+#define STATUS_ENABLE_TIMER(status) ((status) | STATUS_TIMER_ID)
+#define STATUS_DISABLE_TIMER(status) ((status) & ~STATUS_TIMER_ID)
+
 #define STATUS_KUC 0x00000002
 #define SET_KERNEL_MODE(status) ((status) & ~STATUS_KUC)
 #define SET_USER_MODE(status) ((status) | STATUS_KUC)

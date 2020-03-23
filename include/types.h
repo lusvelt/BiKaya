@@ -1,5 +1,5 @@
-#ifndef _TYPES11_H
-#define _TYPES11_H
+#ifndef _TYPES_H_
+#define _TYPES_H_
 #ifdef TARGET_UMPS
 #include <umps/types.h>
 #endif
@@ -7,6 +7,8 @@
 #define UARM_MACHINE_COMPILING
 #include <uarm/uARMtypes.h>
 #endif
+#include <stdint.h>
+
 #include "listx.h"
 
 typedef unsigned int memaddr;
@@ -44,5 +46,11 @@ typedef struct semd_t {
     // Queue of PCBs blocked on the semaphore
     struct list_head s_procQ;
 } semd_t;
+
+typedef uint8_t bool;
+typedef enum {
+    OK = 0,
+    ERR_NO_PROC
+} err_t;
 
 #endif

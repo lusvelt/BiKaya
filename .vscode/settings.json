@@ -5,7 +5,8 @@
         "terminal.h": "c",
         "cstdint": "cpp",
         "scheduler.h": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "pcb.h": "c"
     },
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,

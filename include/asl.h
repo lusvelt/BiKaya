@@ -2,7 +2,6 @@
 #ifndef ASL_H
 #define ASL_H
 
-#include "const.h"
 #include "types.h"
 
 /*!

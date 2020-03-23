@@ -10,7 +10,10 @@ extern void test3();
 int main(void) {
     init();
 
-    createPcb(test1, 1);
+    if (createPcb(test1, 1) == ERR_NO_PROC) {
+        println("Maximum PCB allocations reached");
+        PANIC();
+    }
 
     start();
     return 0;
