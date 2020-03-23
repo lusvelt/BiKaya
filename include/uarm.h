@@ -13,13 +13,13 @@
 #define SET_KERNEL_MODE(status) ((status) | STATUS_SYS_MODE)
 #define SET_USER_MODE(status) ((status) | STATUS_USER_MODE)
 
-#define SET_VM_ON(state)                                  \
+#define SET_VM_OFF(state)                                 \
     {                                                     \
         uint32_t control = (state)->CP15_Control;         \
         (state)->CP15_Control = CP15_DISABLE_VM(control); \
     }
 
-#define SET_VM_OFF(state)                                \
+#define SET_VM_ON(state)                                 \
     {                                                    \
         uint32_t control = (state)->CP15_Control;        \
         (state)->CP15_Control = CP15_ENABLE_VM(control); \

@@ -79,10 +79,7 @@ void termprint(char *str) {
 }
 #endif
 #ifdef TARGET_UARM
-// #define termprint(str) tprint(str);
-void termprint(char *str) {
-    tprint(str);
-}
+#define termprint(str) tprint(str);
 #endif
 
 char *toprint[] = {
