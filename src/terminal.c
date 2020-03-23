@@ -1,10 +1,9 @@
-#include "term.h"
-
 #include <stdarg.h>
 #include <stdint.h>
 
 #include "const.h"
 #include "system.h"
+#include "terminal.h"
 
 #define ST_READY 1
 #define ST_BUSY 3

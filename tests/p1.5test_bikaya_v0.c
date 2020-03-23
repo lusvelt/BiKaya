@@ -1,5 +1,6 @@
 #include "const.h"
 #include "listx.h"
+#include "terminal.h"
 #ifdef TARGET_UMPS
 #include "umps/arch.h"
 #include "umps/libumps.h"
@@ -104,17 +105,17 @@ char *toprint[] = {
 
 void test1() {
     // int i = 0;
-    termprint("Ciccio test1!\n");
-    // for (i = 0; i < STEPS; i++) {
-    //     while (test3_baton[i] == 0)
-    //         ;
+    termprint("Entering test1!\n");
+    /*for (i = 0; i < STEPS; i++) {
+        while (test3_baton[i] == 0)
+            ;
 
-    //     termprint(toprint[i * 3]);
-    //     delay_ms(100);
-    //     test1_baton[i] = 1;
-    // }
-    // while (test3_baton[STEPS] == 0)
-    //     ;
+        termprint(toprint[i * 3]);
+        delay_ms(100);
+        test1_baton[i] = 1;
+    }
+    while (test3_baton[STEPS] == 0)
+        ;*/
     termprint("Good job from test1\n");
     // test1_baton[STEPS] = 1;
     // SYSCALL(SYS3, 0, 0, 0);

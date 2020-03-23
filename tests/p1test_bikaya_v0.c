@@ -34,7 +34,7 @@
 
 #include "const.h"
 #include "listx.h"
-#include "term.h"
+#include "terminal.h"
 
 #ifdef TARGET_UMPS
 #include "umps/arch.h"

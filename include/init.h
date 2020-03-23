@@ -4,13 +4,16 @@
 #include "memset.h"
 #include "system.h"
 
-#define INIT_NEW_AREA(addr, handler)                             \
-    {                                                            \
-        state_t *area = (state_t *)addr;                         \
-        area->pc = (memaddr)handler;                             \
-        area->sp = RAM_TOP;                                      \
-        area->cpsr = STATUS_DISABLE_INT(STATUS_SYS_MODE);        \
-        area->CP15_Control = CP15_DISABLE_VM(CP15_CONTROL_NULL); \
+#define INIT_NEW_AREA(addr, handler)         \
+    {                                        \
+        state_t *area = (state_t *)addr;     \
+        PC_SET(area, handler);               \
+        SP_SET(area, RAM_TOP);               \
+        uint32_t status = STATUS_GET(area);  \
+        status = STATUS_DISABLE_INT(status); \
+        status = SET_KERNEL_MODE(status);    \
+        STATUS_SET(area, status);            \
+        SET_VM_OFF(area);                    \
     }
 
 void init(void);
