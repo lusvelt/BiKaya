@@ -1,7 +1,7 @@
 /* subset of the Linux Kernel source file: "include/linux/list.h"
 CPLv2 */
-#ifndef _LISTX_H
-#define _LISTX_H
+#ifndef _LISTX_H_
+#define _LISTX_H_
 
 #ifndef NULL
 #define NULL ((void *)0)

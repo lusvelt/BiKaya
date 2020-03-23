@@ -1,9 +1,8 @@
 /*! \file */
-#ifndef ASL_H
-#define ASL_H
+#ifndef _ASL_H_
+#define _ASL_H_
 
-#include "const.h"
-#include "types_bikaya.h"
+#include "types.h"
 
 /*!
  * \brief Get the semd associated with the given key

@@ -1,7 +1,7 @@
-#ifndef __MEMSET_H__
-#define __MEMSET_H__
+#ifndef _MEMSET_H_
+#define _MEMSET_H_
 
-typedef unsigned int size_t;
+#include <stddef.h>
 
 void *memset(void *s, int c, size_t n);
 

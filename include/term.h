@@ -1,5 +1,5 @@
-#ifndef __TERM_H__
-#define __TERM_H__
+#ifndef _TERM_H_
+#define _TERM_H_
 
 #include "system.h"
 

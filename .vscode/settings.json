@@ -12,7 +12,7 @@
         "${workspaceFolder}",
         "uarm",
         "umps",
-        "include"
+        "include",
     ],
     "C_Cpp.default.defines": [
         "TARGET_UMPS=1",

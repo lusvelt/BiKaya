@@ -3,7 +3,7 @@
 #include "const.h"
 #include "listx.h"
 #include "pcb.h"
-#include "types_bikaya.h"
+#include "types.h"
 
 HIDDEN semd_t semdTable[MAXPROC];
 HIDDEN LIST_HEAD(semdFree);  // Dummy element of semd free list

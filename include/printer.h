@@ -1,5 +1,5 @@
-#ifndef __PRINTER_H__
-#define __PRINTER_H__
+#ifndef _PRINTER_H_
+#define _PRINTER_H_
 
 void prtr_puts(const char *str);
 
