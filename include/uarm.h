@@ -24,3 +24,12 @@
         uint32_t control = (state)->CP15_Control;        \
         (state)->CP15_Control = CP15_ENABLE_VM(control); \
     }
+
+#define CAUSE_GET(state) ((state)->CP15_Cause)
+#define CAUSE_IS_SYSCALL(cause) (CAUSE_EXCCODE_GET(cause) == EXC_SYSCALL)
+
+#define a0 0
+#define a1 1
+#define a2 2
+#define a3 3
+#define REG_GET(state, reg) (*((uint32_t *)((state) + reg)))

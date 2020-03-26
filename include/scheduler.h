@@ -8,4 +8,6 @@ void start(void);
 
 void addToReadyQueue(pcb_t *p);
 
+err_t killCurrent();
+
 #endif

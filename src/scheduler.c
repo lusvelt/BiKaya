@@ -2,12 +2,23 @@
 
 #include "listx.h"
 #include "system.h"
+#include "terminal.h"
 
 HIDDEN LIST_HEAD(readyQueue);
 
+HIDDEN pcb_t *getReadyHead() {
+    if (list_empty(&readyQueue))
+        return NULL;
+    return container_of(list_next(&readyQueue), pcb_t, p_next);
+}
+
 void start(void) {
-    pcb_t *ready = container_of(list_next(&readyQueue), pcb_t, p_next);
-    LDST(&ready->p_s);
+    pcb_t *proc = getReadyHead();
+    if (proc == NULL) {
+        println("No more processes to execute");
+        HALT();
+    }
+    LDST(&proc->p_s);
 }
 
 // err_t createProcess(pcb_handler_t handler, uint8_t priority) {
@@ -39,4 +50,12 @@ void start(void) {
 
 void addToReadyQueue(pcb_t *p) {
     insertProcQ(&readyQueue, p);
+}
+
+err_t killCurrent() {
+    pcb_t *current = getReadyHead();
+    if (current == NULL)
+        return ERR_READY_QUEUE_EMPTY;
+    outChildrenQ(&readyQueue, current);  // Removes current running process and all of its children from ready queue
+    return OK;
 }

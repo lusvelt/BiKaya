@@ -24,4 +24,7 @@
 
 #define CR 0x0a /* carriage return as returned by the terminal */
 
+/* System calls definition */
+#define TERMINATE_PROCESS 3
+
 #endif

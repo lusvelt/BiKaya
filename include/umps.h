@@ -1,6 +1,8 @@
 #include "types.h"
 #include "umps/arch.h"
+#include "umps/cp0.h"
 #include "umps/libumps.h"
+#include "umps/regdef.h"
 
 #define EXCV_BASE 0x20000000
 #define STATE_T_SIZE 0x8C
@@ -55,3 +57,8 @@
         status = status | STATUS_VMC;        \
         STATUS_SET(state, status);           \
     }
+
+#define CAUSE_GET(state) ((state)->cause)
+#define CAUSE_IS_SYSCALL(cause) (CAUSE_GET_EXCCODE(cause) == EXC_SYS)
+
+#define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))

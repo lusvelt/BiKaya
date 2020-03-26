@@ -130,4 +130,6 @@ pcb_t *removeChild(pcb_t *p);
  */
 pcb_t *outChild(pcb_t *p);
 
+void outChildrenQ(struct list_head *, pcb_t *p);
+
 #endif

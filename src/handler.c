@@ -1,9 +1,30 @@
 #include "handler.h"
 
+#include "scheduler.h"
 #include "system.h"
-#include "terminal.h"
+#include "utils.h"
 
 void syscallHandler(void) {
+    state_t *old = (state_t *)SYSBK_OLDAREA;
+    uint32_t cause = CAUSE_GET(old);
+
+    if (CAUSE_IS_SYSCALL(cause)) {
+        uint32_t no = REG_GET(old, a0);
+        uint32_t arg1 = REG_GET(old, a1);
+        uint32_t arg2 = REG_GET(old, a2);
+        uint32_t arg3 = REG_GET(old, a3);
+
+        switch (no) {
+            case TERMINATE_PROCESS:
+                if (killCurrent() == OK)
+                    start();
+                else
+                    EXIT("Failed to kill process: ready queue empty");
+                break;
+            default:
+                EXIT("Unknown System Call no: %d", no);
+        }
+    }
 }
 
 void interruptHandler(void) {

@@ -118,7 +118,7 @@ void test1() {
         ;*/
     termprint("Good job from test1\n");
     // test1_baton[STEPS] = 1;
-    // SYSCALL(SYS3, 0, 0, 0);
+    SYSCALL(SYS3, 0, 0, 0);
 }
 
 void test2() {

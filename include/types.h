@@ -52,7 +52,8 @@ typedef uint8_t bool;
 
 typedef enum {
     OK = 0,
-    ERR_NO_PROC
+    ERR_NO_PROC,
+    ERR_READY_QUEUE_EMPTY
 } err_t;
 
 #endif
