@@ -12,6 +12,10 @@ int main(void) {
 
     if (createPcb(test1, 1) == ERR_NO_PROC)
         EXIT("Maximum PCB allocations reached");
+    if (createPcb(test2, 2) == ERR_NO_PROC)
+        EXIT("Maximum PCB allocations reached");
+    if (createPcb(test3, 3) == ERR_NO_PROC)
+        EXIT("Maximum PCB allocations reached");
 
     start();
 

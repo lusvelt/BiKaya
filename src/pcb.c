@@ -1,7 +1,7 @@
 #include "pcb.h"
 
 #include "const.h"
-#include "memset.h"
+#include "memory.h"
 #include "terminal.h"
 
 // only relevant to this file, so HIDDEN (static)

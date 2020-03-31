@@ -1,7 +1,7 @@
 #ifndef _INIT_H_
 #define _INIT_H_
 
-#include "memset.h"
+#include "memory.h"
 #include "system.h"
 
 #define INIT_NEW_AREA(addr, handler)         \

@@ -33,3 +33,7 @@
 #define a2 2
 #define a3 3
 #define REG_GET(state, reg) (*((uint32_t *)((state) + reg)))
+
+#define TIMER_LINE INT_TIMER
+#define IS_TIMER_INT(cause) CAUSE_IP_GET((cause), TIMER_LINE)
+#define SET_TIMER(time) setTIMER(time)

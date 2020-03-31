@@ -29,11 +29,13 @@ void syscallHandler(void) {
 
 void interruptHandler(void) {
     state_t *old = (state_t *)INT_OLDAREA;
+    uint32_t cause = CAUSE_GET(old);
+    if (IS_TIMER_INT(cause))
+        next(old);
 
 #ifdef TARGET_UARM
-    PC_SET(old, PC_GET(old) - 4);
+    PC_SET(old, PC_GET(old) - WORD_SIZE);
 #endif
-
     LDST(old);
 }
 

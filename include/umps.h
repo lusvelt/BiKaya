@@ -36,7 +36,7 @@
 #define STATUS_ENABLE_INT(status) ((status) | (STATUS_ID_MASK & ~STATUS_TIMER_ID))
 #define STATUS_DISABLE_INT(status) ((status) & ~(STATUS_ID_MASK & ~STATUS_TIMER_ID))
 
-#define STATUS_ENABLE_TIMER(status) ((status) | STATUS_TIMER_ID)
+#define STATUS_ENABLE_TIMER(status) ((status) | STATUS_TIMER_ID | STATUS_ID)
 #define STATUS_DISABLE_TIMER(status) ((status) & ~STATUS_TIMER_ID)
 
 #define STATUS_KUC 0x00000002
@@ -62,3 +62,7 @@
 #define CAUSE_IS_SYSCALL(cause) (CAUSE_GET_EXCCODE(cause) == EXC_SYS)
 
 #define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))
+
+#define TIMER_LINE IL_CPUTIMER
+#define IS_TIMER_INT(cause) CAUSE_IP(TIMER_LINE) & (cause)
+#define SET_TIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))

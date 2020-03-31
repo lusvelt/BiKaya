@@ -18,7 +18,18 @@ void start(void) {
         println("No more processes to execute");
         HALT();
     }
+    SET_TIMER(TIME_SLICE);
     LDST(&proc->p_s);
+}
+
+void next(state_t *currentState) {
+    pcb_t *current = removeProcQ(&readyQueue);
+    current->p_s = *currentState;
+    pcb_t *p;
+    list_for_each_entry(p, &readyQueue, p_next)
+        p->priority++;
+    insertProcQ(&readyQueue, current);
+    start();
 }
 
 // err_t createProcess(pcb_handler_t handler, uint8_t priority) {

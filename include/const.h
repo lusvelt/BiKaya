@@ -1,6 +1,8 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
+#include "system.h"
+
 /**************************************************************************** 
  *
  * This header file contains the global constant & macro definitions.
@@ -26,5 +28,10 @@
 
 /* System calls definition */
 #define TERMINATE_PROCESS 3
+
+/* System constants */
+#define TIME_SLICE_MS 3000
+#define TIME_SCALE *((uint32_t *)BUS_REG_TIME_SCALE)
+#define TIME_SLICE (TIME_SLICE_MS * TIME_SCALE)
 
 #endif
