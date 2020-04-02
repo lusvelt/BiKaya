@@ -28,13 +28,18 @@
 #define SP_SET(state, val) ((state)->reg_sp = (val))
 
 #define STATUS_ID 0x00000001
+// using INTERVAL timer
 #define STATUS_TIMER_ID 0x00000400
-#define STATUS_ID_MASK 0x0000FF00
+// consistently with uARM, masks all ints except timer
+#define STATUS_ID_MASK 0x0000FB00
 #define STATUS_ALL_INT_DISABLE(status) ((status) & ~STATUS_ID)
 #define STATUS_ALL_INT_ENABLE(status) ((status) | STATUS_ID)
 
-#define STATUS_ENABLE_INT(status) ((status) | (STATUS_ID_MASK & ~STATUS_TIMER_ID))
-#define STATUS_DISABLE_INT(status) ((status) & ~(STATUS_ID_MASK & ~STATUS_TIMER_ID))
+// in order to be consistent with uARM, STATUS_ENABLE_INT enables all interrupts
+// except timer, leaving timer UNCHANGED
+#define STATUS_ENABLE_INT(status) ((status) | STATUS_ID_MASK | STATUS_ID)
+// analogous to STATUS_ENABLE_INT
+#define STATUS_DISABLE_INT(status) ((status) & ~STATUS_ID_MASK)
 
 #define STATUS_ENABLE_TIMER(status) ((status) | STATUS_TIMER_ID | STATUS_ID)
 #define STATUS_DISABLE_TIMER(status) ((status) & ~STATUS_TIMER_ID)
@@ -63,6 +68,6 @@
 
 #define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))
 
-#define TIMER_LINE IL_CPUTIMER
+#define TIMER_LINE IL_TIMER
 #define IS_TIMER_INT(cause) CAUSE_IP(TIMER_LINE) & (cause)
 #define SET_TIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))

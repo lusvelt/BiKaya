@@ -20,5 +20,6 @@
     "C_Cpp.default.defines": [
         "TARGET_UMPS=1",
         "TARGET_UARM=1"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "Disabled"
 }

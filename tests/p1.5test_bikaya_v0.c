@@ -147,7 +147,7 @@ void test3() {
     test3_baton[0] = 1;
     for (i = 0; i < STEPS; i++) {
         while (test2_baton[i] == 0)
-            ;
+            println("antonio");
 
         termprint(toprint[i * 3 + 2]);
         delay_ms(100);
