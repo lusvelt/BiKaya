@@ -27,7 +27,7 @@
 #define PC_SET(state, val) ((state)->pc_epc = (memaddr)(val))
 #define SP_SET(state, val) ((state)->reg_sp = (val))
 
-#define STATUS_ID 0x00000001
+#define STATUS_ID 0x00000004
 // using INTERVAL timer
 #define STATUS_TIMER_ID 0x00000400
 // consistently with uARM, masks all ints except timer
