@@ -14,7 +14,8 @@
 #include "pcb.h"
 
 #define TOD_LO *((unsigned int *)BUS_REG_TOD_LO)
-#define TIME_SCALE *((unsigned int *)BUS_REG_TIME_SCALE)
+// Following is already defined in const.h
+//#define TIME_SCALE *((unsigned int *)BUS_REG_TIME_SCALE)
 #define RAMBASE *((unsigned int *)BUS_REG_RAM_BASE)
 #define RAMSIZE *((unsigned int *)BUS_REG_RAM_SIZE)
 #define RAMTOP (RAMBASE + RAMSIZE)

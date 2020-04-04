@@ -9,6 +9,6 @@
         PANIC();                     \
     }
 
-err_t createPcb(pcb_handler_t func, uint8_t n);
+err_t createProcess(pcb_handler_t handler, uint8_t priority);
 
 #endif
