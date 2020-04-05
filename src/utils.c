@@ -3,7 +3,7 @@
 #include "scheduler.h"
 #include "system.h"
 
-err_t createProcess(pcb_handler_t handler, uint8_t priority) {
+err_t createProcess(pcb_code_t code, uint8_t priority) {
     pcb_t *p = allocPcb();
 
     if (p == NULL)
@@ -18,7 +18,7 @@ err_t createProcess(pcb_handler_t handler, uint8_t priority) {
     SP_SET(&p->p_s, RAM_TOP - FRAME_SIZE * priority);
     p->original_priority = priority;
     p->priority = priority;
-    PC_SET(&p->p_s, (memaddr)handler);
+    PC_SET(&p->p_s, (memaddr)code);
 
     addToReadyQueue(p);
 

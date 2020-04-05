@@ -8,7 +8,12 @@
         println(msg, ##__VA_ARGS__); \
         PANIC();                     \
     }
+#define HALT(msg, ...)               \
+    {                                \
+        println(msg, ##__VA_ARGS__); \
+        HALT();                      \
+    }
 
-err_t createProcess(pcb_handler_t handler, uint8_t priority);
+err_t createProcess(pcb_code_t handler, uint8_t priority);
 
 #endif

@@ -18,8 +18,12 @@ umps2:
 uarm:
 	$(MAKE) -f makefiles/uarm.mk
 
+doc:
+	doxygen Doxyfile
+
 clean:
 	$(MAKE) -f makefiles/umps.mk clean
 	$(MAKE) -f makefiles/uarm.mk clean
+	rm -rf docs
 
-.PHONY: umps umps2 uarm clean test all
+.PHONY: umps umps2 uarm clean test all doc
