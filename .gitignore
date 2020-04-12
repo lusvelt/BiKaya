@@ -1,3 +1,5 @@
-out/
-docs/
+out
+docs
+devices/uarm/*.uarm
+devices/umps/*.umps
 *.config
