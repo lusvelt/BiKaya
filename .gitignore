@@ -2,7 +2,7 @@
 out
 docs
 
-# Delete files but keep folders
+# Ignore files but keep folders
 devices/uarm/*
 devices/umps/*
 !.keep
