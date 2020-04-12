@@ -1,5 +1,12 @@
+# Folders
 out
 docs
-devices/uarm/*.uarm
-devices/umps/*.umps
+
+# Delete files but keep folders
+devices/uarm
+!devices/uarm/.keep
+devices/umps
+!devices/umps/.keep
+
+# Files
 *.config
