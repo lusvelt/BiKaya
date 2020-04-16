@@ -35,6 +35,9 @@
 #define STATUS_ALL_INT_DISABLE(status) ((status) & ~STATUS_ID)
 #define STATUS_ALL_INT_ENABLE(status) ((status) | STATUS_ID)
 
+#define INT_LOWEST 3    /* minimum interrupt number used by real devices */
+#define DEV_USED_INTS 5 /* Number of ints reserved for devices: 3,4,5,6,7 */
+
 // in order to be consistent with uARM, STATUS_ENABLE_INT enables all interrupts
 // except timer, leaving timer UNCHANGED
 #define STATUS_ENABLE_INT(status) ((status) | STATUS_ID_MASK | STATUS_ID)
@@ -71,3 +74,20 @@
 #define TIMER_LINE IL_TIMER
 #define IS_TIMER_INT(cause) CAUSE_IP(TIMER_LINE) & (cause)
 #define SET_TIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))
+
+/* Values for CP0 Cause.ExcCode */
+#define EXC_INTERRUPT EXC_INT
+#define EXC_TLBMOD EXC_MOD
+#define EXC_TLBINVLOAD EXC_TLBL
+#define EXC_TLBINVSTORE EXC_TLBS
+#define EXC_ADDRINVLOAD EXC_ADEL
+#define EXC_ADDRINVSTORE EXC_ADES
+#define EXC_BUSINVFETCH EXC_IBE
+#define EXC_BUSINVLDSTORE EXC_DBE
+#define EXC_SYSCALL EXC_SYS
+#define EXC_BREAKPOINT EXC_BP
+#define EXC_RESERVEDINSTR EXC_RI
+#define EXC_COPROCUNUSABLE EXC_CPU
+#define EXC_ARITHOVERFLOW EXC_OV
+#define EXC_BADPTE EXC_BDPT  /* uMPS-specific */
+#define EXC_PTEMISS EXC_PTMS /* uMPS-specific */

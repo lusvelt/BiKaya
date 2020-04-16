@@ -1,5 +1,6 @@
 #include "init.h"
 
+#include "asl.h"
 #include "handler.h"
 #include "pcb.h"
 
@@ -13,4 +14,5 @@ HIDDEN void initNewAreas(void) {
 void init(void) {
     initNewAreas();
     initPcbs();
+    initASL();
 }

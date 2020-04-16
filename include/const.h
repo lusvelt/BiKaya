@@ -22,6 +22,8 @@
 #define OFF 0
 #define EOS '\0'
 
+#define DEFAULT_PRIORITY 1
+
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 
 #define CR 0x0a /* carriage return as returned by the terminal */

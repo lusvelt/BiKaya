@@ -48,6 +48,15 @@ typedef struct semd_t {
     struct list_head s_procQ;
 } semd_t;
 
+typedef struct semdev {
+    semd_t disk[DEV_PER_INT];
+    semd_t tape[DEV_PER_INT];
+    semd_t network[DEV_PER_INT];
+    semd_t printer[DEV_PER_INT];
+    semd_t terminalR[DEV_PER_INT];
+    semd_t terminalT[DEV_PER_INT];
+} semdev;
+
 typedef uint8_t bool;
 
 typedef enum {
@@ -55,5 +64,16 @@ typedef enum {
     ERR_NO_PROC,
     ERR_READY_QUEUE_EMPTY
 } err_t;
+
+typedef enum {
+    GETCPUTIME = 1,
+    CREATEPROCESS,
+    TERMINATEPROCESS,
+    VERHOGEN,
+    PASSEREN,
+    WAITIO,
+    SPECPASSUP,
+    GETPID,
+} syscall_t;
 
 #endif
