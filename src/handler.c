@@ -9,10 +9,15 @@ void syscallHandler(void) {
     uint32_t cause = CAUSE_GET(old);
 
     if (CAUSE_IS_SYSCALL(cause)) {
+#ifdef TARGET_UMPS
+        PC_SET(old, PC_GET(old) - WORD_SIZE);
+#endif
+
         uint32_t no = REG_GET(old, a0);
-        uint32_t arg1 = REG_GET(old, a1);
-        uint32_t arg2 = REG_GET(old, a2);
-        uint32_t arg3 = REG_GET(old, a3);
+        // Probably needed for phase 2
+        // uint32_t arg1 = REG_GET(old, a1);
+        // uint32_t arg2 = REG_GET(old, a2);
+        // uint32_t arg3 = REG_GET(old, a3);
 
         switch (no) {
             case TERMINATE_PROCESS:
@@ -29,13 +34,14 @@ void syscallHandler(void) {
 
 void interruptHandler(void) {
     state_t *old = (state_t *)INT_OLDAREA;
-    uint32_t cause = CAUSE_GET(old);
-    if (IS_TIMER_INT(cause))
-        next(old);
-
 #ifdef TARGET_UARM
     PC_SET(old, PC_GET(old) - WORD_SIZE);
 #endif
+    uint32_t cause = CAUSE_GET(old);
+
+    if (IS_TIMER_INT(cause))
+        next(old);
+
     LDST(old);
 }
 

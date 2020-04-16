@@ -3,7 +3,7 @@
 #include "scheduler.h"
 #include "system.h"
 
-err_t createPcb(pcb_handler_t func, uint8_t n) {
+err_t createProcess(pcb_code_t code, uint8_t priority) {
     pcb_t *p = allocPcb();
 
     if (p == NULL)
@@ -15,10 +15,10 @@ err_t createPcb(pcb_handler_t func, uint8_t n) {
     status = STATUS_DISABLE_INT(status) | STATUS_ENABLE_TIMER(status) | SET_KERNEL_MODE(status);
     STATUS_SET(&p->p_s, status);
     SET_VM_OFF(&p->p_s);
-    SP_SET(&p->p_s, RAM_TOP - FRAME_SIZE * n);
-    p->original_priority = n;
-    p->priority = n;
-    PC_SET(&p->p_s, (memaddr)func);
+    SP_SET(&p->p_s, RAM_TOP - FRAME_SIZE * priority);
+    p->original_priority = priority;
+    p->priority = priority;
+    PC_SET(&p->p_s, (memaddr)code);
 
     addToReadyQueue(p);
 

@@ -35,7 +35,7 @@ typedef struct pcb_t {
     int *p_semkey;
 } pcb_t;
 
-typedef void (*pcb_handler_t)(void);
+typedef void (*pcb_code_t)(void);
 
 // Semaphore Descriptor (SEMD) data structure
 typedef struct semd_t {

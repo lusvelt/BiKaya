@@ -27,6 +27,7 @@
 #define PC_SET(state, val) ((state)->pc_epc = (memaddr)(val))
 #define SP_SET(state, val) ((state)->reg_sp = (val))
 
+// We set IEp instead of IEc due to shifting operations in LDST
 #define STATUS_ID 0x00000004
 // using INTERVAL timer
 #define STATUS_TIMER_ID 0x00000400

@@ -1,3 +1,11 @@
-out/
-docs/
+# Folders
+out
+docs
+
+# Ignore files but keep folders
+devices/uarm/*
+devices/umps/*
+!.keep
+
+# Files
 *.config
