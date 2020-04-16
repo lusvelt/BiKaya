@@ -92,3 +92,6 @@
 #define EXC_ARITHOVERFLOW EXC_OV
 #define EXC_BADPTE EXC_BDPT  /* uMPS-specific */
 #define EXC_PTEMISS EXC_PTMS /* uMPS-specific */
+
+#define getTODLO() (*((memaddr *)BUS_TODLOW))
+#define getTODHI() (*((memaddr *)BUS_TODHI))

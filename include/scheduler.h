@@ -7,5 +7,5 @@ void start(void);
 void next(state_t *);
 void addToReadyQueue(pcb_t *p);
 err_t killCurrent();
-
+void getCurrent();
 #endif

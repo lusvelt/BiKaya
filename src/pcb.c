@@ -40,6 +40,7 @@ pcb_t *allocPcb(void) {
     // memset(&pcb->p_s,0,sizeof(state_t)),
     // hence the inclusion of memset.h
     pcb->p_s = (state_t){0};
+    pcb->start_tm = pcb->user_tm = pcb->kernel_tm = 0;
 
     return pcb;
 }

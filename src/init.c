@@ -12,6 +12,7 @@ HIDDEN void initNewAreas(void) {
 }
 
 void init(void) {
+    kernel_enter_tm = 0;
     initNewAreas();
     initPcbs();
     initASL();

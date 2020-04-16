@@ -13,13 +13,14 @@
 #include "listx.h"
 
 typedef unsigned int memaddr;
+typedef uint64_t time_t;
 
 // Process Control Block (PCB) data structure
 typedef struct pcb_t {
-    /*process queue fields */
+    /* process queue fields */
     struct list_head p_next;
 
-    /*process tree fields */
+    /* process tree fields */
     struct pcb_t *p_parent;
     struct list_head p_child, p_sib;
 
@@ -33,6 +34,10 @@ typedef struct pcb_t {
 
     /* key of the semaphore on which the process is eventually blocked */
     int *p_semkey;
+
+    /* time tracking fields */
+    time_t start_tm, user_tm, kernel_tm;
+
 } pcb_t;
 
 typedef void (*pcb_code_t)(void);

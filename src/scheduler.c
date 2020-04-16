@@ -57,3 +57,7 @@ err_t killCurrent() {
     outChildrenQ(&readyQueue, current);
     return OK;
 }
+
+pcb_t *getCurrent() {
+    return getReadyHead();
+}

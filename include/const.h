@@ -28,9 +28,6 @@
 
 #define CR 0x0a /* carriage return as returned by the terminal */
 
-/* System calls definition */
-#define TERMINATE_PROCESS 3
-
 /* System constants */
 #define TIME_SLICE_MS 3000
 #define TIME_SCALE *((uint32_t *)BUS_REG_TIME_SCALE)

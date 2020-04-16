@@ -12,10 +12,10 @@ err_t createProcess(pcb_code_t code, uint8_t priority) {
     uint32_t status = STATUS_GET(&p->p_s);
     // we know status is initialized correctly, due to
     // memset in allocPcb()
-    status = STATUS_DISABLE_INT(status) | STATUS_ENABLE_TIMER(status) | SET_KERNEL_MODE(status);
+    status = STATUS_ALL_INT_ENABLE(status);
     STATUS_SET(&p->p_s, status);
     SET_VM_OFF(&p->p_s);
-    SP_SET(&p->p_s, RAM_TOP - FRAME_SIZE * priority);
+    SP_SET(&p->p_s, RAM_TOP - FRAME_SIZE);
     p->original_priority = priority;
     p->priority = priority;
     PC_SET(&p->p_s, (memaddr)code);
