@@ -37,3 +37,5 @@
 #define TIMER_LINE INT_TIMER
 #define IS_TIMER_INT(cause) CAUSE_IP_GET((cause), TIMER_LINE)
 #define SET_TIMER(time) setTIMER(time)
+
+#define SYSCALL_RETURN(state, val) ((state)->a1 = (val))

@@ -95,3 +95,5 @@
 
 #define getTODLO() (*((memaddr *)BUS_TODLOW))
 #define getTODHI() (*((memaddr *)BUS_TODHI))
+
+#define SYSCALL_RETURN(state, val) (*((uint32_t *)((state)->gpr + v0 - 1)) = (val))

@@ -65,10 +65,9 @@ typedef struct semdev {
 typedef uint8_t bool;
 
 typedef enum {
-    OK = 0,
-    ERR_NO_PROC,
-    ERR_READY_QUEUE_EMPTY
-} err_t;
+    SYSCALL_SUCCESS = 0,
+    SYSCALL_FAILURE = -1
+} syscall_ret_t;
 
 typedef enum {
     GETCPUTIME = 1,

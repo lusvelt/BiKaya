@@ -14,6 +14,4 @@
         HALT();                      \
     }
 
-err_t createProcess(pcb_code_t handler, uint8_t priority);
-
 #endif

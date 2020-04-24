@@ -1,6 +1,7 @@
 #include "handler.h"
 
 #include "scheduler.h"
+#include "syscall.h"
 #include "system.h"
 #include "utils.h"
 
@@ -27,7 +28,7 @@ void syscallHandler(void) {
 
     if (CAUSE_IS_SYSCALL(cause)) {
 #ifdef TARGET_UMPS
-        PC_SET(old, PC_GET(old) - WORD_SIZE);
+        PC_SET(old, PC_GET(old) + WORD_SIZE);
 #endif
 
         uint32_t no = REG_GET(old, a0);
@@ -44,16 +45,22 @@ void syscallHandler(void) {
 
                 break;
             case CREATEPROCESS:
+                state_t *state = REG_GET(old, a1);
+                int priority = REG_GET(old, a2);
+                void **cpid = REG_GET(old, a3);
+                SYSCALL_RETURN(state, createProcess(state, priority, cpid));
                 break;
             case TERMINATEPROCESS:
-                if (killCurrent() == OK)
-                    start();
-                else
-                    EXIT("Failed to kill process: ready queue empty");
+                pcb_t *pid = REG_GET(old, a1);
+                SYSCALL_RETURN(state, terminateProcess(pid));
                 break;
             case VERHOGEN:
+                int *semaddr = REG_GET(old, a1);
+                verhogen(semaddr);
                 break;
             case PASSEREN:
+                int *semaddr = REG_GET(old, a1);
+                passeren(semaddr);
                 break;
             case WAITIO:
                 break;

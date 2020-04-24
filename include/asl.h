@@ -21,7 +21,7 @@ semd_t *getSemd(int *key);
  * It initializes the ASL with all the elements
  * from the semaphore table.
  */
-void initASL();
+void initAsl();
 
 /*!
  * \brief Inserts a process the into queue of 

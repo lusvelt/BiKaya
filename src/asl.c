@@ -18,7 +18,7 @@ semd_t *getSemd(int *key) {
     return NULL;
 }
 
-void initASL() {
+void initAsl() {
     for (int i = 0; i < MAXPROC; i++) {
         semdTable[i].s_key = NULL;
         INIT_LIST_HEAD(&semdTable[i].s_procQ);

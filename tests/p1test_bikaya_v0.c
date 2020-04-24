@@ -320,7 +320,7 @@ int main(void) {
     freePcb(procp[9]);
 
     /* check ASL */
-    initASL();
+    initAsl();
     addokbuf("Initializing active semaphore list   \n");
 
     /* check removeBlocked and insertBlocked */

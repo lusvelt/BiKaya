@@ -2,7 +2,6 @@
 
 #include "listx.h"
 #include "system.h"
-#include "utils.h"
 
 HIDDEN LIST_HEAD(readyQueue);
 
@@ -47,15 +46,9 @@ void addToReadyQueue(pcb_t *p) {
     insertProcQ(&readyQueue, p);
 }
 
-err_t killCurrent() {
-    // Ready queue head contains the currently running process
-    pcb_t *current = getReadyHead();
-    if (current == NULL)
-        return ERR_READY_QUEUE_EMPTY;
-
-    // Removes current running process and all of its children from ready queue
-    outChildrenQ(&readyQueue, current);
-    return OK;
+// TODO: Controllare che il pid sia nella ready queue. Devo controllare anche le altre code?
+void removeFromReadyQueue(pcb_t *pid) {
+    outChildrenQ(&readyQueue, pid);
 }
 
 pcb_t *getCurrent() {
