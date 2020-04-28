@@ -60,13 +60,20 @@ void syscallHandler(void) {
                 break;
             case PASSEREN:
                 int *semaddr = REG_GET(old, a1);
-                passeren(semaddr);
+                passeren(semaddr, current);
                 break;
             case WAITIO:
                 break;
             case SPECPASSUP:
                 break;
             case GETPID:
+                memaddr pid = REG_GET(old, a1);
+                memaddr ppid = REG_GET(old, a2);
+                if (pid)
+                    *pid = current;
+                if (ppid)
+                    *ppid = current->p_parent;
+
                 break;
 
             default:

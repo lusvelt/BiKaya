@@ -1,5 +1,6 @@
 #include "scheduler.h"
 
+#include "asl.h"
 #include "listx.h"
 #include "system.h"
 
@@ -46,9 +47,15 @@ void addToReadyQueue(pcb_t *p) {
     insertProcQ(&readyQueue, p);
 }
 
-// TODO: Controllare che il pid sia nella ready queue. Devo controllare anche le altre code?
-void removeFromReadyQueue(pcb_t *pid) {
-    outChildrenQ(&readyQueue, pid);
+void killProgeny(pcb_t *pid) {
+    pcb_t *it;
+    list_for_each_entry(it, &p->p_child, p_sib) {
+        killProgeny(it);
+    }
+    outBlocked(pid);  //remove from semaphores (no need for V()
+                      //because value changes after process resumes)
+
+    outProcQ(&readyQueue, pid);  //remove from readyQueue
 }
 
 pcb_t *getCurrent() {

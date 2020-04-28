@@ -135,11 +135,3 @@ pcb_t *outChild(pcb_t *p) {
     p->p_parent = NULL;
     return p;
 }
-
-void outChildrenQ(struct list_head *head, pcb_t *p) {
-    pcb_t *it;
-    list_for_each_entry(it, &p->p_child, p_sib) {
-        outChildrenQ(head, it);
-    }
-    outProcQ(head, p);
-}

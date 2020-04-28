@@ -24,7 +24,7 @@ semd_t *getSemd(int *key);
 void initAsl();
 
 /*!
- * \brief Inserts a process the into queue of 
+ * \brief Inserts a process into the queue of 
  * the given semaphore.
  * 
  * It inserts the given process to the queue of the

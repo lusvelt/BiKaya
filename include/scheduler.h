@@ -6,7 +6,7 @@
 void start(void);
 void next(state_t *);
 void addToReadyQueue(pcb_t *p);
-void removeFromReadyQueue(pcb_t *pid);
+void killProgeny(pcb_t *pid);
 void getCurrent();
 
 #endif
