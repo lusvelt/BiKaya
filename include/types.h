@@ -38,6 +38,10 @@ typedef struct pcb_t {
     /* time tracking fields */
     time_t start_tm, user_tm, kernel_tm;
 
+    /* handler fields */
+    state_t *sysbk_new, *tlb_new, *trap_new;
+    state_t *sysbk_old, *tlb_old, *trap_old;
+
 } pcb_t;
 
 typedef void (*pcb_code_t)(void);
@@ -80,5 +84,11 @@ typedef enum {
     SPECPASSUP,
     GETPID,
 } syscall_t;
+
+typedef enum {
+    SPU_SYSCALL_BRK = 0,
+    SPU_TLB = 1,
+    SPU_TRAP = 2
+} spu_t;
 
 #endif

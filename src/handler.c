@@ -5,26 +5,10 @@
 #include "system.h"
 #include "utils.h"
 
-HIDDEN inline time_t getTOD() {
-    return (getTODHI() << 32) | getTODLO());
-}
-
-time_t kernel_enter_tm;
-
-HIDDEN void setTimeEnterKernel(pcb_t *current) {
-    kernel_enter_tm = getTOD();
-    current->kernel_tm = getTOD();
-    current->user_tm =
-}
-HIDDEN void setTimeExitKernel(pcb_t *current) {
-    current->kernel_tm = current->kernel_tm + (getTOD() - kernel_enter_tm);
-}
-
 void syscallHandler(void) {
     pcb_t *current = getCurrent();
     state_t *old = (state_t *)SYSBK_OLDAREA;
     uint32_t cause = CAUSE_GET(old);
-    setTimeEnterKernel(current);
 
     if (CAUSE_IS_SYSCALL(cause)) {
 #ifdef TARGET_UMPS
@@ -65,23 +49,25 @@ void syscallHandler(void) {
             case WAITIO:
                 break;
             case SPECPASSUP:
+                spu_t type = REG_GET(old, a1);
+                state_t *spuOld = REG_GET(old, a2);
+                state_t *spuNew = REG_GET(old, a3);
+                SYSCALL_RETURN(state, specPassUp(type, spuOld, spuNew));
                 break;
             case GETPID:
                 memaddr pid = REG_GET(old, a1);
                 memaddr ppid = REG_GET(old, a2);
-                if (pid)
-                    *pid = current;
-                if (ppid)
-                    *ppid = current->p_parent;
-
+                getPid(current, pid, ppid);
                 break;
-
             default:
-                //pass to custom handler if present
-                EXIT("Unknown System Call no: %d", no);
+                if (current->sysbk_new == NULL) {
+                    terminateProcess(current);
+                    SYSCALL_RETURN(state, SYSCALL_FAILURE);
+                }
+                current->sysbk_old = old;
+                LDST(current->sysbk_new);
         }
     }
-    setTimeExitKernel(current);
 }
 
 // TODO: remember to set enter_kernel

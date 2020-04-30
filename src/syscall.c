@@ -52,4 +52,41 @@ syscall_ret_t passeren(int *semaddr, pcb_t *pid) {
         *semaddr--;
     else
         insertBlocked(semaddr, pid);
+    return SYSCALL_SUCCESS;
+}
+
+/* This macro should only be used inside a function that returns syscall_ret_t */
+#define REGISTER_SPU_HANDLER(p, field, old, new) \
+    {                                            \
+        if (p->field##_new != NULL) {            \
+            terminateProcess(p);                 \
+            return SYSCALL_FAILURE;              \
+        }                                        \
+        p->field##_old = old;                    \
+        p->field##_new = new;                    \
+    }
+
+syscall_ret_t specPassUp(spu_t type, state_t *old, state_t *new) {
+    pcb_t *p = getCurrent();
+
+    switch (type) {
+        case SPU_SYSCALL_BRK:
+            REGISTER_SPU_HANDLER(p, sysbk, old, new);
+            break;
+        case SPU_TLB:
+            REGISTER_SPU_HANDLER(p, tlb, old, new);
+            break;
+        case SPU_TRAP:
+            REGISTER_SPU_HANDLER(p, trap, old, new);
+            break;
+    }
+    return SYSCALL_SUCCESS;
+}
+
+syscall_ret_t getPid(pcb_t *p, void **pid, void **ppid) {
+    if (pid)
+        *pid = current;
+    if (ppid)
+        *ppid = current->p_parent;
+    return SYSCALL_SUCCESS;
 }
