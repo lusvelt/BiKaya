@@ -4,6 +4,8 @@
 #include "scheduler.h"
 #include "system.h"
 
+HIDDEN semdev devices;
+
 syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
     pcb_t *p = allocPcb();
 
@@ -45,14 +47,27 @@ syscall_ret_t verhogen(int *semaddr) {
     return SYSCALL_SUCCESS;
 }
 
-syscall_ret_t passeren(int *semaddr, pcb_t *pid) {
-    semd_t *semd = getSemd(semaddr);
-
-    if (*semaddr)
+// Returns 1 if process has been blocked, 0 otherwise
+bool passeren(int *semaddr, pcb_t *pid) {
+    if (*semaddr) {
         *semaddr--;
-    else
+        return 0;
+    } else {
+        removeHeadFromReadyQueue();
         insertBlocked(semaddr, pid);
-    return SYSCALL_SUCCESS;
+        return 1;
+    }
+}
+
+#define SET_COMMAND(reg, subdev, command) (*((reg) + WORD_SIZE * (1 + 2 * (subdev))) = (command))
+
+void waitIo(uint32_t command, uint32_t *reg, bool subdev) {
+    pcb_t *current = getCurrent();
+    int *semkey = getSemKey(reg);
+    SET_COMMAND(reg, subdev, command);
+    *semkey = 0;
+    removeHeadFromReadyQueue();
+    insertBlocked(semkey, current);
 }
 
 /* This macro should only be used inside a function that returns syscall_ret_t */
@@ -85,8 +100,8 @@ syscall_ret_t specPassUp(spu_t type, state_t *old, state_t *new) {
 
 syscall_ret_t getPid(pcb_t *p, void **pid, void **ppid) {
     if (pid)
-        *pid = current;
+        *pid = p;
     if (ppid)
-        *ppid = current->p_parent;
+        *ppid = p->p_parent;
     return SYSCALL_SUCCESS;
 }

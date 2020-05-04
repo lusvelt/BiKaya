@@ -47,6 +47,10 @@ void addToReadyQueue(pcb_t *p) {
     insertProcQ(&readyQueue, p);
 }
 
+void removeHeadFromReadyQueue() {
+    removeProcQ(&readyQueue);
+}
+
 void killProgeny(pcb_t *pid) {
     pcb_t *it;
     list_for_each_entry(it, &p->p_child, p_sib) {

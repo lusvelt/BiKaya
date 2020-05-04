@@ -59,12 +59,12 @@ typedef struct semd_t {
 } semd_t;
 
 typedef struct semdev {
-    semd_t disk[DEV_PER_INT];
-    semd_t tape[DEV_PER_INT];
-    semd_t network[DEV_PER_INT];
-    semd_t printer[DEV_PER_INT];
-    semd_t terminalR[DEV_PER_INT];
-    semd_t terminalT[DEV_PER_INT];
+    int disk[DEV_PER_INT];
+    int tape[DEV_PER_INT];
+    int network[DEV_PER_INT];
+    int printer[DEV_PER_INT];
+    int terminalR[DEV_PER_INT];
+    int terminalT[DEV_PER_INT];
 } semdev;
 
 typedef uint8_t bool;
