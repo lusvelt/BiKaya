@@ -58,15 +58,6 @@ typedef struct semd_t {
     struct list_head s_procQ;
 } semd_t;
 
-typedef struct semdev {
-    int disk[DEV_PER_INT];
-    int tape[DEV_PER_INT];
-    int network[DEV_PER_INT];
-    int printer[DEV_PER_INT];
-    int terminalR[DEV_PER_INT];
-    int terminalT[DEV_PER_INT];
-} semdev;
-
 typedef uint8_t bool;
 
 typedef enum {

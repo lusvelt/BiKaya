@@ -69,12 +69,16 @@
 
 #define CAUSE_GET(state) ((state)->cause)
 #define CAUSE_IS_SYSCALL(cause) (CAUSE_GET_EXCCODE(cause) == EXC_SYS)
+#define CAUSE_GET_LINE(cause) (((cause) >> 8) & 0xFF)
 
+#define A0 a0
+#define A1 a1
+#define A2 a2
+#define A3 a3
 #define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))
 
-#define TIMER_LINE IL_TIMER
-#define IS_TIMER_INT(cause) CAUSE_IP(TIMER_LINE) & (cause)
 #define SET_TIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))
+#define INT_IS_PENDING(cause, line) CAUSE_IP(line) & (cause)
 
 /* Values for CP0 Cause.ExcCode */
 #define EXC_INTERRUPT EXC_INT

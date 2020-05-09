@@ -7,7 +7,6 @@
         "scheduler.h": "c",
         "sstream": "c",
         "pcb.h": "c",
-        "utils.h": "c",
         "handler.h": "c"
     },
     "editor.formatOnSave": true,

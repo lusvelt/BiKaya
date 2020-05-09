@@ -3,6 +3,7 @@
 #include "asl.h"
 #include "listx.h"
 #include "system.h"
+#include "terminal.h"
 
 HIDDEN LIST_HEAD(readyQueue);
 
@@ -53,7 +54,7 @@ void removeHeadFromReadyQueue() {
 
 void killProgeny(pcb_t *pid) {
     pcb_t *it;
-    list_for_each_entry(it, &p->p_child, p_sib) {
+    list_for_each_entry(it, &pid->p_child, p_sib) {
         killProgeny(it);
     }
     outBlocked(pid);  //remove from semaphores (no need for V()

@@ -21,47 +21,47 @@
  */
 
 #ifdef TARGET_UMPS
-#include "umps/libumps.h"
 #include "umps/arch.h"
+#include "umps/libumps.h"
 #include "umps/types.h"
 #define FRAME_SIZE 4096
 /* Elapsed clock ticks (CPU instructions executed) since system power on.
    Only the "low" part is actually used. */
-#define BUS_TODLOW  0x1000001c
+#define BUS_TODLOW 0x1000001c
 #define BUS_TODHIGH 0x10000018
 
-#define VMON  0x07000000
+#define VMON 0x07000000
 #define VMOFF (~VMON)
 
 #define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
-#define SP(s)                    s.reg_sp
-#define PC(s)                    s.pc_epc
-#define VM(s)                    s.status
-#define REG0(s)                  s.reg_a0
+#define SP(s) s.reg_sp
+#define PC(s) s.pc_epc
+#define VM(s) s.status
+#define REG0(s) s.reg_a0
 #define STATUS_ALL_INT_ENABLE(x) (x | (0xFF << 8))
 #define CAUSE_EXCCODE_GET(cause) ((cause >> 2) & 0x1F)
-#define CAUSE_CODE(s)            CAUSE_EXCCODE_GET(s.cause)
+#define CAUSE_CODE(s) CAUSE_EXCCODE_GET(s.cause)
 
 #endif
 
 #ifdef TARGET_UARM
-#include "uarm/libuarm.h"
 #include "uarm/arch.h"
+#include "uarm/libuarm.h"
 #include "uarm/uARMtypes.h"
 
-#define VMON  0x00000001
+#define VMON 0x00000001
 #define VMOFF (~VMON)
 
 #define CAUSE_CODE(s) CAUSE_EXCCODE_GET(s.CP15_Cause)
-#define SP(s)         s.sp
-#define PC(s)         s.pc
-#define VM(s)         s.CP15_Control
-#define REG0(s)       s.a1
+#define SP(s) s.sp
+#define PC(s) s.pc
+#define VM(s) s.CP15_Control
+#define REG0(s) s.a1
 #endif
 
-#include "const_bikaya.h"
-#include "types_bikaya.h"
+#include "const.h"
+#include "types.h"
 
 typedef unsigned int devregtr;
 typedef unsigned int cpu_t;
@@ -73,15 +73,15 @@ typedef unsigned int pid_t;
 
 /* hardware constants */
 #define PRINTCHR 2
-#define BYTELEN  8
-#define RECVD    5
-#define TRANSM   5
+#define BYTELEN 8
+#define RECVD 5
+#define TRANSM 5
 
 #define TERMSTATMASK 0xFF
 #define TERMCHARMASK 0xFF00
 
 #define MINLOOPTIME 1000
-#define LOOPNUM     1000
+#define LOOPNUM 10000
 
 #define BADADDR 0xFFFFFFFF /* could be 0x00000000 as well */
 
@@ -90,22 +90,21 @@ typedef unsigned int pid_t;
 
 /* just to be clear */
 #define NOLEAVES 4 /* number of leaves of p7 process tree */
-#define MAXSEM   20
-
+#define MAXSEM 20
 
 int term_mut = 1,   /* for mutual exclusion on terminal */
     s[MAXSEM + 1],  /* semaphore array */
-    testsem    = 0, /* for a simple test */
-    startp2    = 0, /* used to start p2 */
-    endp2      = 0, /* used to signal p2's demise */
-    blkp3      = 1, /* used to block second incaration of p3 */
-    synp3      = 0, /* used to allow p3 incarnations to synhronize */
-    endp3      = 0, /* to signal demise of p3 */
-    endp4      = 0, /* to signal demise of p4 */
-    endp7      = 0, /* to signal demise of p7 */
-    endcreate  = 0, /* for a p7 leaf to signal its creation */
-    blkleaves  = 0, /* for a p7 leaf to signal its creation */
-    blkp7      = 0, /* to block p7 */
+    testsem = 0,    /* for a simple test */
+    startp2 = 0,    /* used to start p2 */
+    endp2 = 0,      /* used to signal p2's demise */
+    blkp3 = 1,      /* used to block second incaration of p3 */
+    synp3 = 0,      /* used to allow p3 incarnations to synhronize */
+    endp3 = 0,      /* to signal demise of p3 */
+    endp4 = 0,      /* to signal demise of p4 */
+    endp7 = 0,      /* to signal demise of p7 */
+    endcreate = 0,  /* for a p7 leaf to signal its creation */
+    blkleaves = 0,  /* for a p7 leaf to signal its creation */
+    blkp7 = 0,      /* to block p7 */
     blkp7child = 0; /* to block p7's children */
 
 state_t p2state, p3state, p4state, p5state, p6state;
@@ -120,8 +119,8 @@ int p1p2synch = 0; /* to check on p1/p2 synchronization */
 int p7inc;     /* p7's incarnation number */
 int p3inc = 1; /* p3 incarnation number */
 
-int          creation      = 0; /* return code for SYSCALL invocation */
-memaddr *    p4MemLocation = (memaddr *)0x34;
+int creation = 0; /* return code for SYSCALL invocation */
+memaddr *p4MemLocation = (memaddr *)0x34;
 unsigned int p4Stack;
 
 pid_t p3pid;
@@ -143,20 +142,19 @@ unsigned int set_sp_pc_status(state_t *s, state_t *copy, unsigned int pc) {
 #endif
 
 #ifdef TARGET_UARM
-    s->sp   = copy->sp - FRAME_SIZE;
-    s->pc   = pc;
+    s->sp = copy->sp - FRAME_SIZE;
+    s->pc = pc;
     s->cpsr = STATUS_ALL_INT_ENABLE(s->cpsr);
     return s->sp;
 #endif
 }
 
-
 /* a procedure to print on terminal 0 */
 void print(char *msg) {
     unsigned int command;
-    char *       s    = msg;
-    devregtr *   base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);     // (devregtr *)(TERM0ADDR);
-    devregtr     status;
+    char *s = msg;
+    devregtr *base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);  // (devregtr *)(TERM0ADDR);
+    devregtr status;
 
     SYSCALL(PASSEREN, (int)&term_mut, 0, 0); /* get term_mut lock */
 
@@ -182,12 +180,10 @@ void print(char *msg) {
     SYSCALL(VERHOGEN, (int)&term_mut, 0, 0); /* release term_mut */
 }
 
-
 /*                                                                   */
 /*                 p1 -- the root process                            */
 /*                                                                   */
 void test() {
-
     SYSCALL(VERHOGEN, (int)&testsem, 0, 0); /* V(testsem)   */
 
     if (testsem != 1) {
@@ -241,12 +237,12 @@ void test() {
     if (p1p2synch == 0)
         print("error: p1/p2 synchronization bad\n");
 
-    SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p3pid);     //
+    SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p3pid);  //
 
     SYSCALL(PASSEREN, (int)&endp3, 0, 0);
     print("p1 knows p3 ended\n");
 
-    SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, 0);     // start p4
+    SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, 0);  // start p4
 
     SYSCALL(PASSEREN, (int)&endp4, 0, 0);
     print("p1 knows p4 ended\n");
@@ -261,7 +257,7 @@ void test() {
     for (p7inc = 0; p7inc < 4; p7inc++) {
         SYSCALL(PASSEREN, (int)&blkp7, 0, 0);
         blkp7child = 0;
-        blkleaves  = 0;
+        blkleaves = 0;
 
         creation = SYSCALL(CREATEPROCESS, (int)&p7rootstate, DEFAULT_PRIORITY, (int)&p7pid);
 
@@ -288,10 +284,9 @@ void test() {
     PANIC(); /* PANIC !!!     */
 }
 
-
 /* p2 -- semaphore and cputime-SYS test process */
 void p2() {
-    int   i;                          /* just to waste time  */
+    int i;                            /* just to waste time  */
     cpu_t now1, now2;                 /* times of day        */
     cpu_t user_t1, user_t2;           /* user time used       */
     cpu_t kernel_t1, kernel_t2;       /* kernel time used       */
@@ -321,12 +316,9 @@ void p2() {
     now1 = getTODLO();                                                       /* time of day   */
     SYSCALL(GETCPUTIME, (int)&user_t1, (int)&kernel_t1, (int)&wallclock_t1); /* CPU time used */
 
-    int localsem = 0;
     /* delay for some time */
-    for (i = 1; i < LOOPNUM; i++) {
-        SYSCALL(VERHOGEN, (int)&localsem, 0, 0);
-        SYSCALL(PASSEREN, (int)&localsem, 0, 0);
-    }
+    for (i = 1; i < LOOPNUM; i++)
+        ;
 
     SYSCALL(GETCPUTIME, (int)&user_t2, (int)&kernel_t2, (int)&wallclock_t2); /* CPU time used */
     now2 = getTODLO();                                                       /* time of day  */
@@ -356,7 +348,6 @@ void p2() {
     print("error: p2 didn't terminate\n");
     PANIC(); /* PANIC! */
 }
-
 
 /* p3 -- termination test process and getpid test */
 void p3() {
@@ -421,10 +412,9 @@ void p3() {
     PANIC(); /* PANIC            */
 }
 
-
 /* p4's program trap handler */
 void p4prog() {
-    unsigned int exeCode = CAUSE_CODE(pstat_o);     // pstat_o.cause;
+    unsigned int exeCode = CAUSE_CODE(pstat_o);  // pstat_o.cause;
 
     switch (exeCode) {
         case EXC_BUSINVFETCH:
@@ -490,7 +480,7 @@ void p4() {
 
     SYSCALL(SPECPASSUP, 0, (int)&sstat_o, (int)&sstat_n);
 
-    print("p4 - try to cause a pgm trap access some non-existent memory\n");     // TODO: Restore
+    print("p4 - try to cause a pgm trap access some non-existent memory\n");  // TODO: Restore
     /* to cause a pgm trap access some non-existent memory */
     *p4MemLocation = *p4MemLocation + 1; /* Should cause a program trap */
 }
@@ -535,7 +525,6 @@ void p4b() {
     PANIC(); /* PANIC            */
 }
 
-
 /*p5 -- high level syscall without initializing trap vector*/
 void p5() {
     print("p5 starts (and hopefully dies)\n");
@@ -557,7 +546,6 @@ void p6() {
     print("error: p6 alive after program trap with no trap vector\n");
     PANIC();
 }
-
 
 /* p7root -- test of termination of subtree of processes              */
 /* create a subtree of processes, wait for the leaves to block, signal*/

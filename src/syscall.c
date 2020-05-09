@@ -3,8 +3,9 @@
 #include "asl.h"
 #include "scheduler.h"
 #include "system.h"
+#include "terminal.h"
 
-HIDDEN semdev devices;
+HIDDEN int devices[8][8];
 
 syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
     pcb_t *p = allocPcb();
@@ -40,8 +41,8 @@ syscall_ret_t terminateProcess(pcb_t *pid) {
 syscall_ret_t verhogen(int *semaddr) {
     semd_t *semd = getSemd(semaddr);
 
-    if (list_empty(semd->s_procQ))
-        *semaddr++;
+    if (list_empty(&semd->s_procQ))
+        (*semaddr)++;
     else
         addToReadyQueue(removeBlocked(semaddr));
     return SYSCALL_SUCCESS;
@@ -50,7 +51,7 @@ syscall_ret_t verhogen(int *semaddr) {
 // Returns 1 if process has been blocked, 0 otherwise
 bool passeren(int *semaddr, pcb_t *pid) {
     if (*semaddr) {
-        *semaddr--;
+        (*semaddr)--;
         return 0;
     } else {
         removeHeadFromReadyQueue();
@@ -59,15 +60,16 @@ bool passeren(int *semaddr, pcb_t *pid) {
     }
 }
 
-#define SET_COMMAND(reg, subdev, command) (*((reg) + WORD_SIZE * (1 + 2 * (subdev))) = (command))
+#define SET_COMMAND(reg, subdev, command) (*((uint32_t *)((reg) + WORD_SIZE * (1 + 2 * (subdev)))) = (command))
 
-void waitIo(uint32_t command, uint32_t *reg, bool subdev) {
+void waitIo(uint32_t command, devreg_t *reg, bool subdev) {
     pcb_t *current = getCurrent();
-    int *semkey = getSemKey(reg);
+    int *semKey = getDeviceSemKey(reg);
     SET_COMMAND(reg, subdev, command);
-    *semkey = 0;
+    *semKey = 0;
     removeHeadFromReadyQueue();
-    insertBlocked(semkey, current);
+    if (insertBlocked(semKey, current))
+        EXIT("Too many semaphores allocated.");
 }
 
 /* This macro should only be used inside a function that returns syscall_ret_t */
@@ -104,4 +106,12 @@ syscall_ret_t getPid(pcb_t *p, void **pid, void **ppid) {
     if (ppid)
         *ppid = p->p_parent;
     return SYSCALL_SUCCESS;
+}
+
+int *getDeviceSemKey(devreg_t *reg) {
+    int line, dev;
+    int tmp = ((uint32_t)reg - DEV_REG_START) / DEV_REG_SIZE;
+    dev = tmp % N_DEV_PER_IL;
+    line = (tmp - dev) / N_DEV_PER_IL + DEV_IL_START;
+    return &devices[line][dev];
 }

@@ -1,35 +1,21 @@
+#include "terminal.h"
+
 #include <stdarg.h>
 #include <stdint.h>
 
 #include "const.h"
 #include "system.h"
-#include "terminal.h"
-
-#define ST_READY 1
-#define ST_BUSY 3
-#define ST_TRANSMITTED 5
-#define ST_RECEIVED ST_TRANSMITTED
-
-#define CMD_ACK 1
-#define CMD_TRANSMIT 2
-#define CMD_RECEIVE CMD_TRANSMIT
-
-#define CHAR_OFFSET 8
-#define TERM_STATUS_MASK 0xFF
-
-#define tx_status(term) ((term->transm_status) & TERM_STATUS_MASK)
-#define rx_status(term) ((term->recv_status) & TERM_STATUS_MASK)
 
 int tputchar(termreg_t *term, int c) {
     uint32_t stat;
 
-    stat = tx_status(term);
+    stat = TX_STATUS(term);
     if (stat != ST_READY && stat != ST_TRANSMITTED)
         return -1;
 
     term->transm_command = ((c << CHAR_OFFSET) | CMD_TRANSMIT);
 
-    while ((stat = tx_status(term)) == ST_BUSY)
+    while ((stat = TX_STATUS(term)) == ST_BUSY)
         ;
 
     term->transm_command = CMD_ACK;
@@ -101,13 +87,13 @@ void tprintf(termreg_t *term, const char *fmt, ...) {
 int tgetchar(termreg_t *term) {
     uint32_t stat;
 
-    stat = rx_status(term);
+    stat = RX_STATUS(term);
     if (stat != ST_READY && stat != ST_RECEIVED)
         return -1;
 
     term->recv_command = CMD_RECEIVE;
 
-    while ((stat = rx_status(term)) == ST_BUSY)
+    while ((stat = RX_STATUS(term)) == ST_BUSY)
         ;
 
     char c = term->recv_status >> CHAR_OFFSET;

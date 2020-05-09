@@ -26,11 +26,19 @@
 
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 
+#define CMD_ACK 1
+
+#define ST_READY 1
+#define ST_BUSY 3
+
 #define CR 0x0a /* carriage return as returned by the terminal */
 
 /* System constants */
 #define TIME_SLICE_MS 3000
 #define TIME_SCALE *((uint32_t *)BUS_REG_TIME_SCALE)
 #define TIME_SLICE (TIME_SLICE_MS * (TIME_SCALE))
+
+/* interrupt lines */
+#define INT_BITMAP(line) (1 << (line))
 
 #endif
