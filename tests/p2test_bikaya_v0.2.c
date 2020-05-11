@@ -164,7 +164,6 @@ void print(char *msg) {
         command = PRINTCHR | (((devregtr)*s) << BYTELEN);
         /* Wait for I/O completion (SYS8) */
         status = SYSCALL(WAITIO, command, (int)base, FALSE);
-
         /*		PANIC(); */
 
         if ((status & TERMSTATMASK) != TRANSM)
@@ -222,6 +221,7 @@ void test() {
     set_sp_pc_status(&gchild3state, &gchild2state, (unsigned int)p7leaf);
     set_sp_pc_status(&gchild4state, &gchild3state, (unsigned int)p7leaf);
 
+    print("test blocked before CREATEPROCESS\n");
     /* create process p2 */
     SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, 0); /* start p2     */
     print("p2 was started\n");

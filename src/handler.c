@@ -12,7 +12,8 @@
 #define ENTER_HANDLER(oldarea)         \
     pcb_t *current = getCurrent();     \
     state_t *old = (state_t *)oldarea; \
-    current->p_s = *old;
+    current->p_s = *old;               \
+    old = &current->p_s
 
 HIDDEN int devFromBitmap(uint8_t bitmap) {
     switch (bitmap) {
@@ -137,18 +138,19 @@ HIDDEN void handleInterrupt(uint8_t line) {
     *semKey = 1;  // FIXME: è giusto aggiornare manualmente il valore del semaforo?
     uint32_t status;
     if (line != IL_TERMINAL) {
-        dtpreg_t *reg = reg;
-        status = reg->status;
-        reg->command = CMD_ACK;
+        dtpreg_t *dev = &reg->dtp;
+        status = dev->status;
+        dev->command = CMD_ACK;
     } else {
-        termreg_t *reg = reg;
-        if (TX_STATUS(reg) == ST_READY)  // Ricezione
-            status = reg->recv_status;
-        else if (RX_STATUS(reg) == ST_READY)  // Trasmissione
-            status = reg->transm_status;
-        reg->recv_command = CMD_ACK;
-        reg->transm_command = CMD_ACK;
+        termreg_t *term = &reg->term;
+        if (TX_STATUS(term) == ST_READY)  // Ricezione
+            status = term->recv_status;
+        else if (RX_STATUS(term) == ST_READY)  // Trasmissione
+            status = term->transm_status;
+        term->recv_command = CMD_ACK;
+        term->transm_command = CMD_ACK;
     }
+
     SYSCALL_RETURN(&p->p_s, status);
 }
 

@@ -34,7 +34,7 @@
 // consistently with uARM, masks all ints except timer
 #define STATUS_ID_MASK 0x0000FB00
 #define STATUS_ALL_INT_DISABLE(status) ((status) & ~STATUS_ID)
-#define STATUS_ALL_INT_ENABLE(status) ((status) | STATUS_ID)
+#define STATUS_ALL_INT_ENABLE(status) ((status) | STATUS_ID | STATUS_ID_MASK | STATUS_TIMER_ID)
 
 #define INT_LOWEST 3    /* minimum interrupt number used by real devices */
 #define DEV_USED_INTS 5 /* Number of ints reserved for devices: 3,4,5,6,7 */
