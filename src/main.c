@@ -6,12 +6,9 @@
 extern void test();
 
 int main(void) {
-    println("before init");
     init();
-    println("after init");
 
     state_t s;
-    println("launching stst!");
     STST(&s);
 
 #ifdef TARGET_UMPS

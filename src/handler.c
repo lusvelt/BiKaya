@@ -155,6 +155,7 @@ HIDDEN void handleInterrupt(state_t *old, uint8_t line) {
 
 // TODO: remember to set enter_kernel
 void interruptHandler(void) {
+    println("interruptHandler called!!");
     state_t *old = (state_t *)INT_OLDAREA;
 #ifdef TARGET_UARM
     PC_SET(old, PC_GET(old) - WORD_SIZE);

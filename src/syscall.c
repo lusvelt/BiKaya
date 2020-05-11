@@ -68,15 +68,13 @@ bool passeren(int *semaddr, pcb_t *pid) {
     }
 }
 
-#define SET_COMMAND(reg, subdev, command) (*((uint32_t *)((reg) + WORD_SIZE * (1 + 2 * (subdev)))) = (command))
+#define SET_COMMAND(reg, subdev, command) (*((uint32_t *)(reg) + 1 + (2 * (1 - subdev))) = (command))
 
 void waitIo(uint32_t command, devreg_t *reg, bool subdev) {
     println("entered waitIO function");
     pcb_t *current = getCurrent();
     int *semKey = getDeviceSemKey(reg);
-    println("calling SET_COMMAND, with command %d", command);
     SET_COMMAND(reg, subdev, command);
-    println("called SET_COMMAND, and dev accepted command %d", reg->term.transm_command);
     *semKey = 0;
     removeHeadFromReadyQueue();
     if (insertBlocked(semKey, current))
