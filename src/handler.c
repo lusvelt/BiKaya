@@ -6,6 +6,14 @@
 #include "system.h"
 #include "terminal.h"
 
+// this macro sets state to state found in old, to avoid
+// discrepancies between last known state and real state
+// only internal use
+#define ENTER_HANDLER(oldarea)         \
+    pcb_t *current = getCurrent();     \
+    state_t *old = (state_t *)oldarea; \
+    current->p_s = *old;
+
 HIDDEN int devFromBitmap(uint8_t bitmap) {
     switch (bitmap) {
         case 0b00000001:
@@ -28,9 +36,7 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
 }
 
 void syscallHandler(void) {
-    println("syscall request received!");
-    pcb_t *current = getCurrent();
-    state_t *old = (state_t *)SYSBK_OLDAREA;
+    ENTER_HANDLER(SYSBK_OLDAREA);
     uint32_t cause = CAUSE_GET(old);
 
     if (CAUSE_IS_SYSCALL(cause)) {
@@ -71,29 +77,22 @@ void syscallHandler(void) {
                 break;
             }
             case VERHOGEN: {
-                println("VERHOGEN babyyyyyyy");
                 int *semaddr = REG_GET(old, A1);
-                println("in *semaddr, before verhogen, we have %d", *semaddr);
                 verhogen(semaddr);
                 LDST(old);
                 break;
             }
             case PASSEREN: {
-                println("PASSEREN lad");
                 int *semaddr = REG_GET(old, A1);
                 int blocked = passeren(semaddr, current);
-                println("blocked was %d", blocked);
                 if (blocked) {
-                    println("leaving passeren calling start");
                     start();
                 } else {
-                    println("leaving passeren calling LDST");
                     LDST(old);
                 }
                 break;
             }
             case WAITIO: {
-                println("WAITIO requested");
                 uint32_t command = REG_GET(old, A1);
                 uint32_t *reg = REG_GET(old, A2);
                 bool subdev = REG_GET(old, A3);
@@ -118,7 +117,7 @@ void syscallHandler(void) {
             default:
                 if (current->sysbk_new == NULL) {
                     terminateProcess(current);
-                    next(old);
+                    start();
                 } else {  // Unnecessary but increases readibility
                     current->sysbk_old = old;
                     LDST(current->sysbk_new);
@@ -127,12 +126,13 @@ void syscallHandler(void) {
     }
 }
 
-HIDDEN void handleInterrupt(state_t *old, uint8_t line) {
+HIDDEN void handleInterrupt(uint8_t line) {
     uint8_t *bitmap = CDEV_BITMAP_ADDR(line);
     int dev = devFromBitmap(*bitmap);
     devreg_t *reg = DEV_REG_ADDR(line, dev);
     int *semKey = getDeviceSemKey(reg);
     pcb_t *p = removeBlocked(semKey);
+
     addToReadyQueue(p);
     *semKey = 1;  // FIXME: è giusto aggiornare manualmente il valore del semaforo?
     uint32_t status;
@@ -150,41 +150,50 @@ HIDDEN void handleInterrupt(state_t *old, uint8_t line) {
         reg->transm_command = CMD_ACK;
     }
     SYSCALL_RETURN(&p->p_s, status);
-    next(old);
 }
 
 // TODO: remember to set enter_kernel
 void interruptHandler(void) {
-    state_t *old = (state_t *)INT_OLDAREA;
+    ENTER_HANDLER(INT_OLDAREA);
 #ifdef TARGET_UARM
     PC_SET(old, PC_GET(old) - WORD_SIZE);
 #endif
     uint32_t cause = CAUSE_GET(old);
 
     if (INT_IS_PENDING(cause, IL_TIMER)) {
-        next(old);
+        // remove the current process
+        removeHeadFromReadyQueue();
+        aging();
+        // We reset current process priority to avoid inflated priority
+        current->priority = current->original_priority;
+        addToReadyQueue(current);
+        SET_TIMER(TIME_SLICE);
     }
     if (INT_IS_PENDING(cause, IL_DISK))
-        handleInterrupt(old, IL_DISK);
+        handleInterrupt(IL_DISK);
     if (INT_IS_PENDING(cause, IL_TAPE))
-        handleInterrupt(old, IL_TAPE);
+        handleInterrupt(IL_TAPE);
     if (INT_IS_PENDING(cause, IL_ETHERNET))
-        handleInterrupt(old, IL_ETHERNET);
+        handleInterrupt(IL_ETHERNET);
     if (INT_IS_PENDING(cause, IL_PRINTER))
-        handleInterrupt(old, IL_ETHERNET);
+        handleInterrupt(IL_ETHERNET);
     if (INT_IS_PENDING(cause, IL_TERMINAL)) {
-        println("terminal interrupt");
-        handleInterrupt(old, IL_TERMINAL);
+        handleInterrupt(IL_TERMINAL);
     }
+    // if head didn't change... peculiar pattern. to be investigated.
+    // we may want to include this check in start
+    if (current == getCurrent())
+        LDST(old);
+    else
+        start();
 }
 
 void trapHandler(void) {
-    pcb_t *current = getCurrent();
-    state_t *old = (state_t *)PGMTRAP_OLDAREA;
+    ENTER_HANDLER(PGMTRAP_OLDAREA);
 
     if (current->trap_new == NULL) {
         terminateProcess(current);
-        next(old);
+        start();
     } else {
         current->trap_old = old;
         LDST(current->trap_new);
@@ -192,12 +201,11 @@ void trapHandler(void) {
 }
 
 void tlbExceptionHandler(void) {
-    pcb_t *current = getCurrent();
-    state_t *old = (state_t *)TLB_OLDAREA;
+    ENTER_HANDLER(TLB_OLDAREA);
 
     if (current->tlb_new == NULL) {
         terminateProcess(current);
-        next(old);
+        start();
     } else {
         current->tlb_old = old;
         LDST(current->tlb_new);

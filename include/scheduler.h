@@ -9,5 +9,6 @@ void addToReadyQueue(pcb_t *p);
 void removeHeadFromReadyQueue();
 void killProgeny(pcb_t *pid);
 pcb_t *getCurrent();
+void aging();
 
 #endif
