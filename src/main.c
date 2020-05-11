@@ -22,6 +22,7 @@ int main(void) {
     s.pc = test;
     s.cpsr = STATUS_ALL_INT_ENABLE(s.cpsr);
 #endif
+    SET_VM_OFF(&s);
     pcb_t *p = allocPcb();
 
     p->p_s = s;
