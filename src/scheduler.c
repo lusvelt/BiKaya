@@ -22,7 +22,14 @@ void start(void) {
     if (proc == NULL) {
         // For the purpose of phase 1.5, when all the processes terminate the system is halted
         // HALT("No more processes to execute.");
-        WAIT();
+        state_t state;
+        STST(&state);
+        STATUS_SET(&state, STATUS_ALL_INT_ENABLE(STATUS_GET(&state)));
+        LDST(&state);
+
+        while (1) {
+            WAIT();
+        }
     }
 
     SET_TIMER(TIME_SLICE);

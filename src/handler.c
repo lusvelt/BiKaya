@@ -155,15 +155,15 @@ HIDDEN void handleInterrupt(state_t *old, uint8_t line) {
 
 // TODO: remember to set enter_kernel
 void interruptHandler(void) {
-    println("interruptHandler called!!");
     state_t *old = (state_t *)INT_OLDAREA;
 #ifdef TARGET_UARM
     PC_SET(old, PC_GET(old) - WORD_SIZE);
 #endif
     uint32_t cause = CAUSE_GET(old);
 
-    if (INT_IS_PENDING(cause, IL_TIMER))
+    if (INT_IS_PENDING(cause, IL_TIMER)) {
         next(old);
+    }
     if (INT_IS_PENDING(cause, IL_DISK))
         handleInterrupt(old, IL_DISK);
     if (INT_IS_PENDING(cause, IL_TAPE))
@@ -172,8 +172,10 @@ void interruptHandler(void) {
         handleInterrupt(old, IL_ETHERNET);
     if (INT_IS_PENDING(cause, IL_PRINTER))
         handleInterrupt(old, IL_ETHERNET);
-    if (INT_IS_PENDING(cause, IL_TERMINAL))
+    if (INT_IS_PENDING(cause, IL_TERMINAL)) {
+        println("terminal interrupt");
         handleInterrupt(old, IL_TERMINAL);
+    }
 }
 
 void trapHandler(void) {
