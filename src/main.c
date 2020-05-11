@@ -15,12 +15,14 @@ int main(void) {
     s.reg_sp = RAM_TOP - FRAME_SIZE;
     s.pc_epc = test;
     s.status = STATUS_ALL_INT_ENABLE(s.status);
+    s.status = SET_KERNEL_MODE(s.status);
 #endif
 
 #ifdef TARGET_UARM
     s.sp = RAM_TOP - FRAME_SIZE;
     s.pc = test;
     s.cpsr = STATUS_ALL_INT_ENABLE(s.cpsr);
+    s.cpsr = SET_KERNEL_MODE(s.cpsr);
 #endif
     SET_VM_OFF(&s);
     pcb_t *p = allocPcb();
