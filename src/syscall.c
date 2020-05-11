@@ -40,13 +40,9 @@ syscall_ret_t terminateProcess(pcb_t *pid) {
 
 syscall_ret_t verhogen(int *semaddr) {
     semd_t *semd = getSemd(semaddr);
-    println("the sem descriptor is in fact: %p", semd);
-    println("list of processes on this sem is %d", list_empty(&semd->s_procQ));
     if (semd == NULL || list_empty(&semd->s_procQ)) {
-        println("increasing *semaddr, now at %d", *semaddr);
         (*semaddr)++;
     } else {
-        println("since list was NOT empty, adding blocked process");
         addToReadyQueue(removeBlocked(semaddr));
     }
     return SYSCALL_SUCCESS;
@@ -55,15 +51,11 @@ syscall_ret_t verhogen(int *semaddr) {
 // Returns 1 if process has been blocked, 0 otherwise
 bool passeren(int *semaddr, pcb_t *pid) {
     if (*semaddr) {
-        println("decrementing *semaddr, which now is %d", *semaddr);
         (*semaddr)--;
-        println("and it's now become %d", *semaddr);
         return 0;
     } else {
-        println("not going through this code");
         removeHeadFromReadyQueue();
         insertBlocked(semaddr, pid);
-        println("or this");
         return 1;
     }
 }
@@ -71,7 +63,6 @@ bool passeren(int *semaddr, pcb_t *pid) {
 #define SET_COMMAND(reg, subdev, command) (*((uint32_t *)(reg) + 1 + (2 * (1 - subdev))) = (command))
 
 void waitIo(uint32_t command, devreg_t *reg, bool subdev) {
-    println("entered waitIO function");
     pcb_t *current = getCurrent();
     int *semKey = getDeviceSemKey(reg);
     SET_COMMAND(reg, subdev, command);
