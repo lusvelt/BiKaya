@@ -162,7 +162,6 @@ void print(char *msg) {
         /* Put "transmit char" command+char in term0 register (3rd word). This
                  actually starts the operation on the device! */
         command = PRINTCHR | (((devregtr)*s) << BYTELEN);
-
         /* Wait for I/O completion (SYS8) */
         status = SYSCALL(WAITIO, command, (int)base, FALSE);
 

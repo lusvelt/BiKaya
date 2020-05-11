@@ -18,9 +18,11 @@ void start(void) {
     // PRECONDITION: at this point, the ready queue head contains the next
     // process that will run
     pcb_t *proc = getReadyHead();
+
     if (proc == NULL) {
         // For the purpose of phase 1.5, when all the processes terminate the system is halted
-        HALT("No more processes to execute.");
+        // HALT("No more processes to execute.");
+        WAIT();
     }
 
     SET_TIMER(TIME_SLICE);

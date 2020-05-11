@@ -29,17 +29,17 @@
 /* Device register type for disks, tapes and printers (dtp) */
 typedef struct {
   unsigned int status;
-    unsigned int command;
-    unsigned int data0;
-    unsigned int data1;
+  unsigned int command;
+  unsigned int data0;
+  unsigned int data1;
 } dtpreg_t;
 
 /* Device register type for terminals; fields have different meanings */
 typedef struct {
   unsigned int recv_status;
-    unsigned int recv_command;
-    unsigned int transm_status;
-    unsigned int transm_command;
+  unsigned int recv_command;
+  unsigned int transm_status;
+  unsigned int transm_command;
 } termreg_t;
 
 /* With a pointer to devreg_t we can refer to a "generic" device register, and
@@ -47,7 +47,7 @@ typedef struct {
      necessary, but for convenience and clarity) */
 typedef union {
   dtpreg_t dtp;
-    termreg_t term;
+  termreg_t term;
 } devreg_t;
 
 /************************* CPU state type ***********************************/

@@ -6,25 +6,28 @@
 extern void test();
 
 int main(void) {
+    println("before init");
     init();
+    println("after init");
 
-    state_t *s;
-    STST(s);
+    state_t s;
+    println("launching stst!");
+    STST(&s);
 
 #ifdef TARGET_UMPS
-    s->reg_sp = RAM_TOP - FRAME_SIZE;
-    s->pc_epc = test;
-    s->status = STATUS_ALL_INT_ENABLE(s->status);
+    s.reg_sp = RAM_TOP - FRAME_SIZE;
+    s.pc_epc = test;
+    s.status = STATUS_ALL_INT_ENABLE(s.status);
 #endif
 
 #ifdef TARGET_UARM
-    s->sp = RAM_TOP - FRAME_SIZE;
-    s->pc = test;
-    s->cpsr = STATUS_ALL_INT_ENABLE(s->cpsr);
+    s.sp = RAM_TOP - FRAME_SIZE;
+    s.pc = test;
+    s.cpsr = STATUS_ALL_INT_ENABLE(s.cpsr);
 #endif
     pcb_t *p = allocPcb();
 
-    p->p_s = *s;
+    p->p_s = s;
 
     p->original_priority = 1;
     p->priority = 1;

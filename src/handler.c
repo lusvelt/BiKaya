@@ -28,6 +28,7 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
 }
 
 void syscallHandler(void) {
+    println("syscall request received!");
     pcb_t *current = getCurrent();
     state_t *old = (state_t *)SYSBK_OLDAREA;
     uint32_t cause = CAUSE_GET(old);
@@ -70,21 +71,29 @@ void syscallHandler(void) {
                 break;
             }
             case VERHOGEN: {
+                println("VERHOGEN babyyyyyyy");
                 int *semaddr = REG_GET(old, A1);
+                println("in *semaddr, before verhogen, we have %d", *semaddr);
                 verhogen(semaddr);
                 LDST(old);
                 break;
             }
             case PASSEREN: {
+                println("PASSEREN lad");
                 int *semaddr = REG_GET(old, A1);
                 int blocked = passeren(semaddr, current);
-                if (blocked)
+                println("blocked was %d", blocked);
+                if (blocked) {
+                    println("leaving passeren calling start");
                     start();
-                else
+                } else {
+                    println("leaving passeren calling LDST");
                     LDST(old);
+                }
                 break;
             }
             case WAITIO: {
+                println("WAITIO requested");
                 uint32_t command = REG_GET(old, A1);
                 uint32_t *reg = REG_GET(old, A2);
                 bool subdev = REG_GET(old, A3);

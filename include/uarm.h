@@ -29,11 +29,11 @@
 #define CAUSE_IS_SYSCALL(cause) (CAUSE_EXCCODE_GET(cause) == EXC_SYSCALL)
 #define CAUSE_GET_LINE(cause) (((cause) >> 24) & 0xFF)
 
-#define A0 0
-#define A1 1
-#define A2 2
-#define A3 3
-#define REG_GET(state, reg) (*((uint32_t *)((state) + (reg))))
+#define A0 a1
+#define A1 a2
+#define A2 a3
+#define A3 a4
+#define REG_GET(state, reg) ((state)->reg)
 
 #define SET_TIMER(time) setTIMER(time)
 #define INT_IS_PENDING(cause, line) CAUSE_IP_GET((cause), (line))
