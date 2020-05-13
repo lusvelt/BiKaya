@@ -64,7 +64,10 @@ void syscallHandler(void) {
                 state_t *state = REG_GET(old, A1);
                 int priority = REG_GET(old, A2);
                 void **cpid = REG_GET(old, A3);
+                println("priority: %d, state:%p, cpid: %p", priority, state, cpid);
                 SYSCALL_RETURN(old, createProcess(state, priority, cpid));
+                int val = old->reg_v0;
+                println("ran createProcess, return %d", val);
                 LDST(old);
                 break;
             }

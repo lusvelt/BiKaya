@@ -38,7 +38,7 @@ void start(void) {
         PC_SET(&idle->p_s, idleProcess);
         proc = idle;
         addToReadyQueue(idle);
-    } else {
+    } else if (proc != idle) {
         if (outProcQ(&readyQueue, idle))
             freePcb(idle);
     }

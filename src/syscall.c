@@ -8,6 +8,8 @@
 HIDDEN int devices[8][8];
 
 syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
+    println("inside createProcess");
+    println("priority: %d, state:%p, cpid: %p", priority, state, cpid);
     pcb_t *p = allocPcb();
 
     if (p == NULL)
