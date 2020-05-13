@@ -221,7 +221,6 @@ void test() {
     set_sp_pc_status(&gchild3state, &gchild2state, (unsigned int)p7leaf);
     set_sp_pc_status(&gchild4state, &gchild3state, (unsigned int)p7leaf);
 
-    print("before CREATEPROCESS\n");
     /* create process p2 */
     SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, 0); /* start p2     */
     print("p2 was started\n");

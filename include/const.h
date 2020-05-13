@@ -3,6 +3,8 @@
 
 #include "system.h"
 
+//#define DEBUG
+
 /**************************************************************************** 
  *
  * This header file contains the global constant & macro definitions.

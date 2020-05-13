@@ -41,6 +41,15 @@ void tputs(termreg_t *term, const char *str);
 #define println(fmt, ...) print(fmt "\n", ##__VA_ARGS__)
 void tprintf(termreg_t *term, const char *fmt, ...);
 
+#ifdef DEBUG
+#define DEBUG_TERM TERM(1)
+#define debug(fmt, ...) tprintf(DEBUG_TERM, fmt, ##__VA_ARGS__)
+#define debugln(fmt, ...) debug(fmt "\n", ##__VA_ARGS__)
+#else
+#define debug(fmt, ...)
+#define debugln(fmt, ...)
+#endif
+
 #define getchar tgetchar(TERM_0)
 int tgetchar(termreg_t *term);
 

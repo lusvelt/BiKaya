@@ -8,8 +8,6 @@
 HIDDEN int devices[8][8];
 
 syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
-    println("inside createProcess");
-    println("priority: %d, state:%p, cpid: %p", priority, state, cpid);
     pcb_t *p = allocPcb();
 
     if (p == NULL)
@@ -22,6 +20,7 @@ syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
 
     pcb_t *current = getCurrent();
     insertChild(current, p);
+    debugln("Created process %p, son of %p", p, current);
 
     addToReadyQueue(p);
 
@@ -44,8 +43,12 @@ syscall_ret_t verhogen(int *semaddr) {
     semd_t *semd = getSemd(semaddr);
     if (semd == NULL || list_empty(&semd->s_procQ)) {
         (*semaddr)++;
+        debugln("semd of %p(%d) is NULL or queue is empty", semaddr, *semaddr);
     } else {
-        addToReadyQueue(removeBlocked(semaddr));
+        pcb_t *blocked = removeBlocked(semaddr);
+        debugln("Remove process %p (pc = %p) blocked on %p", blocked, blocked->p_s.gpr[28], semaddr);
+        addToReadyQueue(blocked);
+        debugln("Added process %p (pc = %p) to readyQueue", blocked, blocked->p_s.gpr[28]);
     }
     return SYSCALL_SUCCESS;
 }

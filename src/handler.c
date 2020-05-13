@@ -37,6 +37,7 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
 }
 
 void syscallHandler(void) {
+    debugln("oldarea pc = %p", ((state_t *)SYSBK_OLDAREA)->gpr[28]);
     ENTER_HANDLER(SYSBK_OLDAREA);
     uint32_t cause = CAUSE_GET(old);
 
@@ -64,10 +65,7 @@ void syscallHandler(void) {
                 state_t *state = REG_GET(old, A1);
                 int priority = REG_GET(old, A2);
                 void **cpid = REG_GET(old, A3);
-                println("priority: %d, state:%p, cpid: %p", priority, state, cpid);
                 SYSCALL_RETURN(old, createProcess(state, priority, cpid));
-                int val = old->reg_v0;
-                println("ran createProcess, return %d", val);
                 LDST(old);
                 break;
             }
@@ -82,16 +80,25 @@ void syscallHandler(void) {
             }
             case VERHOGEN: {
                 int *semaddr = REG_GET(old, A1);
+                debugln("V of %p on %p with value %d", current, semaddr, *semaddr);
                 verhogen(semaddr);
-                LDST(old);
+                debugln("AFTER V of %p on %p (semvalue = %d)", current, semaddr, *semaddr);
+                if (current == getCurrent())
+                    LDST(old);
+                else
+                    start();
                 break;
             }
             case PASSEREN: {
+                debugln("%p (pc = %p) called passeren", current, current->p_s.gpr[28]);
                 int *semaddr = REG_GET(old, A1);
+                debugln("P of %p on %p with value %d", current, semaddr, *semaddr);
                 int blocked = passeren(semaddr, current);
                 if (blocked) {
+                    debugln("%p(pc = %p) blocked on %p(%d)", current, current->p_s.gpr[28], semaddr, *semaddr);
                     start();
                 } else {
+                    debugln("%p DID NOT block on %p(%d)", current, semaddr, *semaddr);
                     LDST(old);
                 }
                 break;

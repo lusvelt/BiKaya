@@ -24,13 +24,26 @@ void idleProcess() {
 }
 
 // TODO: change name. this starts the head AND RESETS TIME SLICE!
+// TODO: review and improve idle process handling (it should be treated as a normal process)
 void start(void) {
     // PRECONDITION: at this point, the ready queue head contains the next
     // process that will run
     pcb_t *proc = getReadyHead();
 
+#ifdef DEBUG
+    if (!list_empty(&readyQueue)) {
+        pcb_t *it;
+        debug("readyQueue: ");
+        list_for_each_entry(it, &readyQueue, p_next) {
+            debug("-> %p (pc = %p)", it, it->p_s.gpr[28]);
+        }
+        debugln();
+    }
+#endif
+
     if (proc == NULL) {
         idle = allocPcb();
+        debugln("proc is NULL, idle allocated (%p)", idle);
         STST(&idle->p_s);
         idle->original_priority = idle->priority = 0;
         STATUS_SET(&idle->p_s, STATUS_ALL_INT_ENABLE(STATUS_GET(&idle->p_s)));
@@ -38,11 +51,16 @@ void start(void) {
         PC_SET(&idle->p_s, idleProcess);
         proc = idle;
         addToReadyQueue(idle);
-    } else if (proc != idle) {
-        if (outProcQ(&readyQueue, idle))
+    } else if (idle && proc != idle) {
+        debugln("proc != idle (%p != %p)", proc, idle);
+        if (outProcQ(&readyQueue, idle)) {
+            debugln("idle present in readyQueue, removed? %d", outProcQ(&readyQueue, idle) != NULL);
             freePcb(idle);
+            idle = NULL;
+        }
     }
 
+    debugln("Starting %p at %p", proc, proc->p_s.gpr[28]);
     SET_TIMER(TIME_SLICE);
     LDST(&proc->p_s);
 }
