@@ -18,6 +18,7 @@ syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
     p->original_priority = priority;
     p->priority = priority;
 
+    debugln("Created process %p (pc = %p)", p, p->p_s.pc);
     pcb_t *current = getCurrent();
     insertChild(current, p);
 
@@ -34,6 +35,7 @@ syscall_ret_t terminateProcess(pcb_t *pid) {
         pid = getCurrent();
     if (pid == NULL)
         return SYSCALL_FAILURE;
+    println("about to kill %p", pid);
     killProgeny(pid);
     return SYSCALL_SUCCESS;
 }

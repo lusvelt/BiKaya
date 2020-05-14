@@ -36,6 +36,12 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
     }
 }
 
+#define TRACE_SYSCALL(fmt, ...)      \
+    do {                             \
+        debugln(fmt, ##__VA_ARGS__); \
+        printReadyQueue();           \
+    } while (0);
+
 void syscallHandler(void) {
     ENTER_HANDLER(SYSBK_OLDAREA);
     uint32_t cause = CAUSE_GET(old);
@@ -65,12 +71,17 @@ void syscallHandler(void) {
                 int priority = REG_GET(old, A2);
                 void **cpid = REG_GET(old, A3);
                 SYSCALL_RETURN(old, createProcess(state, priority, cpid));
-                LDST(old);
+                printReadyQueue();
+                if (current == getCurrent())
+                    LDST(old);
+                else
+                    start();
                 break;
             }
             case TERMINATEPROCESS: {
                 pcb_t *pid = REG_GET(old, A1);
                 SYSCALL_RETURN(old, terminateProcess(pid));
+                printReadyQueue();
                 if (pid)
                     LDST(old);  // No need to go through scheduler since process is using its time slice fairly
                 else
@@ -119,18 +130,19 @@ void syscallHandler(void) {
                 break;
             }
             default:
-                // debugln("Entro nel default con %p", current->p_s.lr);
+                debugln("Entro nel default con %p", current->p_s.lr);
                 debugln("&pcb: %p", current);
                 debugln("sysbk_new: %p", current->sysbk_new);
                 debugln("sysbk_old: %p", current->sysbk_old);
                 if (current->sysbk_new == NULL) {
-                    debugln("Terminating process");
-                    terminateProcess(current);
+                    terminateProcess(NULL);
+                    printReadyQueue();
                     start();
                 } else {  // Unnecessary but increases readibility
                     debugln("Call custom syscall");
                     *(current->sysbk_old) = *old;
-                    debugln("updated sysbk_old: %p", current->sysbk_old);
+                    debugln("updated sysbk_old: %p (lr = %p)", current->sysbk_old, current->sysbk_old->lr);
+                    printReadyQueue();
                     LDST(current->sysbk_new);
                 }
         }
@@ -192,6 +204,8 @@ void interruptHandler(void) {
     if (INT_IS_PENDING(cause, IL_TERMINAL)) {
         handleInterrupt(IL_TERMINAL);
     }
+
+    printReadyQueue();
     // if head didn't change... peculiar pattern. to be investigated.
     // we may want to include this check in start
     if (current == getCurrent())

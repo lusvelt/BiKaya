@@ -100,13 +100,37 @@ void killProgeny(pcb_t *pid) {
     list_for_each_entry(it, &pid->p_child, p_sib) {
         killProgeny(it);
     }
-    outBlocked(pid);  //remove from semaphores (no need for V()
-                      //because value changes after process resumes)
 
-    if (outProcQ(&readyQueue, pid))  //remove from readyQueue
+    outChild(pid);
+
+    // remove from semaphores (no need for V()
+    // because value changes after process resumes)
+    outBlocked(pid);
+
+    // remove from readyQueue
+    if (outProcQ(&readyQueue, pid))
         freePcb(pid);
 }
 
 pcb_t *getCurrent() {
     return getReadyHead();
 }
+
+#ifdef DEBUG
+void printReadyQueue() {
+    if (!list_empty(&readyQueue)) {
+        debug("readyQueue = ");
+        pcb_t *it;
+        list_for_each_entry(it, &readyQueue, p_next) {
+            if (idle == it) {
+                debug("-> idle ");
+            } else {
+                debug("-> %p(lr = %p, pc = %p) ", it, it->p_s.lr, it->p_s.pc);
+            }
+        }
+        debugln();
+    } else {
+        debugln("readyQueue is empty");
+    }
+}
+#endif
