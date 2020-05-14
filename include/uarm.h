@@ -7,7 +7,7 @@
 #define SP_GET(state) ((state)->sp)
 
 #define STATUS_SET(state, val) ((state)->cpsr = (val))
-#define PC_SET(state, val) ((state)->pc = (memaddr)(val))
+#define PC_SET(state, val) ((state)->pc = (uint32_t)(val))
 #define SP_SET(state, val) ((state)->sp = (val))
 
 #define SET_KERNEL_MODE(status) ((status) | STATUS_SYS_MODE)

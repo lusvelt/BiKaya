@@ -37,7 +37,6 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
 }
 
 void syscallHandler(void) {
-    debugln("oldarea pc = %p", ((state_t *)SYSBK_OLDAREA)->gpr[28]);
     ENTER_HANDLER(SYSBK_OLDAREA);
     uint32_t cause = CAUSE_GET(old);
 
@@ -80,9 +79,7 @@ void syscallHandler(void) {
             }
             case VERHOGEN: {
                 int *semaddr = REG_GET(old, A1);
-                debugln("V of %p on %p with value %d", current, semaddr, *semaddr);
                 verhogen(semaddr);
-                debugln("AFTER V of %p on %p (semvalue = %d)", current, semaddr, *semaddr);
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -90,17 +87,12 @@ void syscallHandler(void) {
                 break;
             }
             case PASSEREN: {
-                debugln("%p (pc = %p) called passeren", current, current->p_s.gpr[28]);
                 int *semaddr = REG_GET(old, A1);
-                debugln("P of %p on %p with value %d", current, semaddr, *semaddr);
                 int blocked = passeren(semaddr, current);
-                if (blocked) {
-                    debugln("%p(pc = %p) blocked on %p(%d)", current, current->p_s.gpr[28], semaddr, *semaddr);
+                if (blocked)
                     start();
-                } else {
-                    debugln("%p DID NOT block on %p(%d)", current, semaddr, *semaddr);
+                else
                     LDST(old);
-                }
                 break;
             }
             case WAITIO: {
@@ -120,9 +112,10 @@ void syscallHandler(void) {
                 break;
             }
             case GETPID: {
-                memaddr pid = REG_GET(old, A1);
-                memaddr ppid = REG_GET(old, A2);
+                uint32_t *pid = REG_GET(old, A1);
+                uint32_t *ppid = REG_GET(old, A2);
                 getPid(current, pid, ppid);
+                LDST(old);
                 break;
             }
             default:

@@ -61,6 +61,7 @@
 #endif
 
 #include "const.h"
+#include "terminal.h"
 #include "types.h"
 
 typedef unsigned int devregtr;
@@ -150,7 +151,7 @@ unsigned int set_sp_pc_status(state_t *s, state_t *copy, unsigned int pc) {
 }
 
 /* a procedure to print on terminal 0 */
-void print(char *msg) {
+void print_test(char *msg) {
     unsigned int command;
     char *s = msg;
     devregtr *base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);  // (devregtr *)(TERM0ADDR);
@@ -185,11 +186,11 @@ void test() {
     SYSCALL(VERHOGEN, (int)&testsem, 0, 0); /* V(testsem)   */
 
     if (testsem != 1) {
-        print("error: p1 v(testsem) with no effects\n");
+        print_test("error: p1 v(testsem) with no effects\n");
         PANIC();
     }
 
-    print("p1 v(testsem)\n");
+    print_test("p1 v(testsem)\n");
 
     /* set up states of the other processes */
 
@@ -223,27 +224,27 @@ void test() {
 
     /* create process p2 */
     SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, 0); /* start p2     */
-    print("p2 was started\n");
+    print_test("p2 was started\n");
 
     SYSCALL(VERHOGEN, (int)&startp2, 0, 0); /* V(startp2)   */
 
     /* P1 blocks until p2 finishes and Vs endp2 */
     SYSCALL(PASSEREN, (int)&endp2, 0, 0); /* P(endp2)     */
-    print("p1 knows p2 ended\n");
+    print_test("p1 knows p2 ended\n");
 
     /* make sure we really blocked */
     if (p1p2synch == 0)
-        print("error: p1/p2 synchronization bad\n");
+        print_test("error: p1/p2 synchronization bad\n");
 
     SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p3pid);  //
 
     SYSCALL(PASSEREN, (int)&endp3, 0, 0);
-    print("p1 knows p3 ended\n");
+    print_test("p1 knows p3 ended\n");
 
     SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, 0);  // start p4
 
     SYSCALL(PASSEREN, (int)&endp4, 0, 0);
-    print("p1 knows p4 ended\n");
+    print_test("p1 knows p4 ended\n");
 
     SYSCALL(CREATEPROCESS, (int)&p5state, DEFAULT_PRIORITY, 0); /* start p5		*/
 
@@ -260,7 +261,7 @@ void test() {
         creation = SYSCALL(CREATEPROCESS, (int)&p7rootstate, DEFAULT_PRIORITY, (int)&p7pid);
 
         if (creation == ERROR) {
-            print("error in process creation\n");
+            print_test("error in process creation\n");
             PANIC();
         }
 
@@ -272,13 +273,13 @@ void test() {
         SYSCALL(VERHOGEN, (int)&blkp7child, 0, 0);
     }
 
-    print("\n");
+    print_test("\n");
 
-    print("p1 finishes OK -- TTFN\n");
+    print_test("p1 finishes OK -- TTFN\n");
     *((memaddr *)BADADDR) = 0; /* terminate p1 */
 
     /* should not reach this point, since p1 just got a program trap */
-    print("error: p1 still alive after progtrap & no trap vector\n");
+    print_test("error: p1 still alive after progtrap & no trap vector\n");
     PANIC(); /* PANIC !!!     */
 }
 
@@ -293,7 +294,7 @@ void p2() {
     /* startp2 is initialized to 0. p1 Vs it then waits for p2 termination */
     SYSCALL(PASSEREN, (int)&startp2, 0, 0); /* P(startp2)   */
 
-    print("p2 starts\n");
+    print_test("p2 starts\n");
 
     /* initialize all semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++)
@@ -304,10 +305,10 @@ void p2() {
         SYSCALL(VERHOGEN, (int)&s[i], 0, 0); /* V(S[I]) */
         SYSCALL(PASSEREN, (int)&s[i], 0, 0); /* P(S[I]) */
         if (s[i] != 0)
-            print("error: p2 bad v/p pairs\n");
+            print_test("error: p2 bad v/p pairs\n");
     }
 
-    print("p2 v/p pairs successfully\n");
+    print_test("p2 v/p pairs successfully\n");
 
     /* test of SYS6 */
 
@@ -323,17 +324,17 @@ void p2() {
 
     if (((user_t2 - user_t1) >= (kernel_t2 - kernel_t1)) && ((wallclock_t2 - wallclock_t1) >= (user_t2 - user_t1)) &&
         ((now2 - now1) >= (wallclock_t2 - wallclock_t1)) && ((user_t2 - user_t1) >= MINLOOPTIME)) {
-        print("p2 (semaphores and time check) is OK\n");
+        print_test("p2 (semaphores and time check) is OK\n");
     } else {
         if ((user_t2 - user_t1) < (kernel_t2 - kernel_t1))
-            print("warning: here kernel time should be less than user time\n");
+            print_test("warning: here kernel time should be less than user time\n");
         if ((wallclock_t2 - wallclock_t1) < (user_t2 - user_t1))
-            print("error: more cpu time than wallclock time\n");
+            print_test("error: more cpu time than wallclock time\n");
         if ((now2 - now1) < (wallclock_t2 - wallclock_t1))
-            print("error: more wallclock time than real time\n");
+            print_test("error: more wallclock time than real time\n");
         if ((user_t2 - user_t1) < MINLOOPTIME)
-            print("error: not enough cpu time went by\n");
-        print("p2 blew it!\n");
+            print_test("error: not enough cpu time went by\n");
+        print_test("p2 blew it!\n");
     }
 
     p1p2synch = 1; /* p1 will check this */
@@ -343,7 +344,7 @@ void p2() {
     SYSCALL(TERMINATEPROCESS, 0, 0, 0); /* terminate p2 */
 
     /* just did a SYS2, so should not get to this point */
-    print("error: p2 didn't terminate\n");
+    print_test("error: p2 didn't terminate\n");
     PANIC(); /* PANIC! */
 }
 
@@ -354,25 +355,25 @@ void p3() {
 
     switch (p3inc) {
         case 1:
-            print("first incarnation of p3 starts\n");
+            print_test("first incarnation of p3 starts\n");
+            // debugln("&pid: %p", &pid);
             SYSCALL(GETPID, (int)&pid, 0, 0);
             if (p3pid != pid) {
-                print("error: createprocess or getpid are wrong\n");
+                print_test("error: createprocess or getpid are wrong\n");
                 PANIC();
             }
             p3inc++;
             break;
         case 2:
-            print("second incarnation of p3 starts\n");
+            print_test("second incarnation of p3 starts\n");
             SYSCALL(GETPID, 0, (int)&pid, 0);
             if (p3pid != pid) {
-                print("error: createprocess or getppid are wrong\n");
+                print_test("error: createprocess or getppid are wrong\n");
                 PANIC();
             }
 
             break;
     }
-
     SYSCALL(VERHOGEN, (int)&synp3, 0, 0); /* V(synp3)     */
 
     /* first incarnation made blkp3=0, the second is blocked (blkp3 become -1) */
@@ -387,26 +388,26 @@ void p3() {
 
     SP(p3state) = SP(p3state) - FRAME_SIZE; /* give another page  */
 
-    print("p3 create a new p3\n");
+    print_test("p3 create a new p3\n");
     SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p32id); /* start a new p3    */
 
     SYSCALL(PASSEREN, (int)&synp3, 0, 0); /* wait for it       */
-    print("p3 termination of the child\n");
+    print_test("p3 termination of the child\n");
     if (SYSCALL(TERMINATEPROCESS, (int)p32id, 0, 0) < 0) { /* terminate p3      */
-        print("error: terminate process is wrong\n");
+        print_test("error: terminate process is wrong\n");
         PANIC();
     }
 
-    print("p3 is OK\n");
+    print_test("p3 is OK\n");
 
     SYSCALL(VERHOGEN, (int)&endp3, 0, 0); /* V(endp3)          */
 
-    print("p3 termination after the child\n");
+    print_test("p3 termination after the child\n");
 
     SYSCALL(TERMINATEPROCESS, 0, 0, 0); /* terminate p3      */
 
     /* just did a SYS2, so should not get to this point */
-    print("error: p3 didn't terminate\n");
+    print_test("error: p3 didn't terminate\n");
     PANIC(); /* PANIC            */
 }
 
@@ -416,12 +417,12 @@ void p4prog() {
 
     switch (exeCode) {
         case EXC_BUSINVFETCH:
-            print("pgmTrapHandler - Access non-existent memory\n");
+            print_test("pgmTrapHandler - Access non-existent memory\n");
             PC(pstat_o) = (memaddr)p4a; /* Continue with p4a() */
             break;
 
         default:
-            print("pgmTrapHandler - other program trap\n");
+            print_test("pgmTrapHandler - other program trap\n");
     }
 
     LDST(&pstat_o); /* "return" to old area (that changed meanwhile) */
@@ -430,14 +431,14 @@ void p4prog() {
 /* p4's memory management (tlb) trap handler */
 /* void p4mm(unsigned int cause) { */
 void p4mm() {
-    print("memory management (tlb) trap\n");
+    print_test("memory management (tlb) trap\n");
     // mstat_o.status = mstat_o.status & 0xFFFFFFF0; /* user mode on */
     VM(mstat_o) &= VMOFF;               /* disable VM */
     PC(mstat_o) = (memaddr)p4b;         /* return to p4b */
     SP(mstat_o) = p4Stack - FRAME_SIZE; /* Start with a fresh stack */
 
     /* this is made to p4b(). printed in this point because in p4b the kernel mode is off */
-    print("p4 - try call sys13 to verify pass up\n");
+    print_test("p4 - try call sys13 to verify pass up\n");
 
     LDST(&mstat_o);
 }
@@ -446,17 +447,17 @@ void p4mm() {
 /* void p4sys(unsigned int cause) { */
 void p4sys() {
     if (REG0(sstat_o) != 13) {
-        print("Not the right syscall code!\n");
+        print_test("Not the right syscall code!\n");
         PANIC();
     } else {
-        print("Custom system call handler called successfully; continuing...\n");
+        print_test("Custom system call handler called successfully; continuing...\n");
         LDST(&sstat_o);
     }
 }
 
 /* p4 -- SYS5 test process */
 void p4() {
-    print("p4 starts\n");
+    print_test("p4 starts\n");
 
     /* set up higher level TRAP handlers (new areas) */
     STST(&pstat_n);                /* pgmtrap new area */
@@ -478,7 +479,7 @@ void p4() {
 
     SYSCALL(SPECPASSUP, 0, (int)&sstat_o, (int)&sstat_n);
 
-    print("p4 - try to cause a pgm trap access some non-existent memory\n");  // TODO: Restore
+    print_test("p4 - try to cause a pgm trap access some non-existent memory\n");  // TODO: Restore
     /* to cause a pgm trap access some non-existent memory */
     *p4MemLocation = *p4MemLocation + 1; /* Should cause a program trap */
 }
@@ -486,7 +487,7 @@ void p4() {
 void p4a() {
     unsigned int p4Status;
 
-    print("p4a - try to generate a TLB exception\n");
+    print_test("p4a - try to generate a TLB exception\n");
 
 /* generate a TLB exception by turning on VM without setting up the
          seg tables */
@@ -503,45 +504,45 @@ void p4a() {
 
 /* second part of p4 - should be entered in user mode */
 void p4b() {
-    print("p4b - Invoking custom system call 13\n");
+    print_test("p4b - Invoking custom system call 13\n");
     SYSCALL(13, 0, 0, 0);
 
     SYSCALL(VERHOGEN, (int)&endp4, 0, 0); /* V(endp4) */
 
-    print("p4 - try to redefine PGMVECT, it will cause p4 termination\n");
+    print_test("p4 - try to redefine PGMVECT, it will cause p4 termination\n");
     /* should cause a termination       */
     /* since this has already been      */
     /* done for PROGTRAPs               */
     if (SYSCALL(SPECPASSUP, 2, (int)&pstat_o, (int)&pstat_n) == 0) {
-        print("error: double SPECPASSUP should not succeed\n");
+        print_test("error: double SPECPASSUP should not succeed\n");
         PANIC();
     }
 
     SYSCALL(TERMINATEPROCESS, 0, 0, 0);
     /* should have terminated, so should not get to this point */
-    print("error: p4 didn't terminate\n");
+    print_test("error: p4 didn't terminate\n");
     PANIC(); /* PANIC            */
 }
 
 /*p5 -- high level syscall without initializing trap vector*/
 void p5() {
-    print("p5 starts (and hopefully dies)\n");
+    print_test("p5 starts (and hopefully dies)\n");
 
     SYSCALL(13, 0, 0, 0); /* should cause termination because p5 has no
                                                                                                    trap vector */
 
-    print("error: p5 alive after SYS13() with no trap vector\n");
+    print_test("error: p5 alive after SYS13() with no trap vector\n");
 
     PANIC();
 }
 
 /*p6 -- program trap without initializing passup vector*/
 void p6() {
-    print("p6 starts (and hopefully dies)\n");
+    print_test("p6 starts (and hopefully dies)\n");
 
     *((memaddr *)BADADDR) = 0;
 
-    print("error: p6 alive after program trap with no trap vector\n");
+    print_test("error: p6 alive after program trap with no trap vector\n");
     PANIC();
 }
 
@@ -551,7 +552,7 @@ void p6() {
 void p7root() {
     int i;
 
-    print("p7root starts\n");
+    print_test("p7root starts\n");
 
     SYSCALL(CREATEPROCESS, (int)&child1state, DEFAULT_PRIORITY, 0);
     SYSCALL(CREATEPROCESS, (int)&child2state, DEFAULT_PRIORITY, 0);
@@ -559,7 +560,7 @@ void p7root() {
     for (i = 0; i < NOLEAVES; i++)
         SYSCALL(PASSEREN, (int)&endcreate, 0, 0);
 
-    print("Leaves created, now terminating...\n");
+    print_test("Leaves created, now terminating...\n");
 
     SYSCALL(TERMINATEPROCESS, (int)leaf1pid, 0, 0);
     SYSCALL(TERMINATEPROCESS, (int)leaf2pid, 0, 0);
@@ -573,14 +574,14 @@ void p7root() {
 
     SYSCALL(PASSEREN, (int)&blkp7, 0, 0);
 
-    print("Error: p7root should not reach here!\n");
+    print_test("Error: p7root should not reach here!\n");
     PANIC();
 }
 
 /*child1 & child2 -- create two sub-processes each*/
 
 void child1() {
-    print("child1 starts\n");
+    print_test("child1 starts\n");
 
     SYSCALL(CREATEPROCESS, (int)&gchild1state, DEFAULT_PRIORITY, (int)&leaf1pid);
 
@@ -588,12 +589,12 @@ void child1() {
 
     SYSCALL(PASSEREN, (int)&blkp7child, 0, 0);
 
-    print("error: p7 child was not killed with father\n");
+    print_test("error: p7 child was not killed with father\n");
     PANIC();
 }
 
 void child2() {
-    print("child2 starts\n");
+    print_test("child2 starts\n");
 
     SYSCALL(CREATEPROCESS, (int)&gchild3state, DEFAULT_PRIORITY, (int)&leaf3pid);
 
@@ -601,19 +602,19 @@ void child2() {
 
     SYSCALL(PASSEREN, (int)&blkp7child, 0, 0);
 
-    print("error: p7 child was not killed with father\n");
+    print_test("error: p7 child was not killed with father\n");
     PANIC();
 }
 
 /*p7leaf -- code for leaf processes*/
 
 void p7leaf() {
-    print("leaf process starts\n");
+    print_test("leaf process starts\n");
 
     SYSCALL(VERHOGEN, (int)&endcreate, 0, 0);
 
     SYSCALL(PASSEREN, (int)&blkleaves, 0, 0);
 
-    print("error: p7 grandchild was not killed with father\n");
+    print_test("error: p7 grandchild was not killed with father\n");
     PANIC();
 }

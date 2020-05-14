@@ -12,7 +12,6 @@
 
 #include "listx.h"
 
-typedef unsigned int memaddr;
 typedef uint64_t time_t;
 
 // Process Control Block (PCB) data structure

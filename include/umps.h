@@ -24,7 +24,7 @@
 #define SP_GET(state) ((state)->reg_sp)
 
 #define STATUS_SET(state, val) ((state)->status = (val))
-#define PC_SET(state, val) ((state)->pc_epc = (memaddr)(val))
+#define PC_SET(state, val) ((state)->pc_epc = (uint32_t)(val))
 #define SP_SET(state, val) ((state)->reg_sp = (val))
 
 // We set IEp instead of IEc due to shifting operations in LDST
@@ -97,7 +97,7 @@
 #define EXC_BADPTE EXC_BDPT  /* uMPS-specific */
 #define EXC_PTEMISS EXC_PTMS /* uMPS-specific */
 
-#define getTODLO() (*((memaddr *)BUS_TODLOW))
-#define getTODHI() (*((memaddr *)BUS_TODHI))
+#define getTODLO() (*((uint32_t *)BUS_TODLOW))
+#define getTODHI() (*((uint32_t *)BUS_TODHI))
 
 #define SYSCALL_RETURN(state, val) (*((uint32_t *)((state)->gpr + v0 - 1)) = (val))

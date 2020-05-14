@@ -20,7 +20,6 @@ syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
 
     pcb_t *current = getCurrent();
     insertChild(current, p);
-    debugln("Created process %p, son of %p", p, current);
 
     addToReadyQueue(p);
 
@@ -43,12 +42,9 @@ syscall_ret_t verhogen(int *semaddr) {
     semd_t *semd = getSemd(semaddr);
     if (semd == NULL || list_empty(&semd->s_procQ)) {
         (*semaddr)++;
-        debugln("semd of %p(%d) is NULL or queue is empty", semaddr, *semaddr);
     } else {
         pcb_t *blocked = removeBlocked(semaddr);
-        debugln("Remove process %p (pc = %p) blocked on %p", blocked, blocked->p_s.gpr[28], semaddr);
         addToReadyQueue(blocked);
-        debugln("Added process %p (pc = %p) to readyQueue", blocked, blocked->p_s.gpr[28]);
     }
     return SYSCALL_SUCCESS;
 }
@@ -105,11 +101,12 @@ syscall_ret_t specPassUp(spu_t type, state_t *old, state_t *new) {
     return SYSCALL_SUCCESS;
 }
 
-syscall_ret_t getPid(pcb_t *p, void **pid, void **ppid) {
+syscall_ret_t getPid(pcb_t *p, uint32_t *pid, uint32_t *ppid) {
     if (pid)
-        *pid = p;
+        *pid = (uint32_t)p;
     if (ppid)
-        *ppid = p->p_parent;
+        *ppid = (uint32_t)p->p_parent;
+    debugln("p: %p, pid: %p, ppid: %p", p, *pid, ppid);
     return SYSCALL_SUCCESS;
 }
 
