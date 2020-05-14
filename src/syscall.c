@@ -106,7 +106,6 @@ syscall_ret_t getPid(pcb_t *p, uint32_t *pid, uint32_t *ppid) {
         *pid = (uint32_t)p;
     if (ppid)
         *ppid = (uint32_t)p->p_parent;
-    debugln("p: %p, pid: %p, ppid: %p", p, *pid, ppid);
     return SYSCALL_SUCCESS;
 }
 

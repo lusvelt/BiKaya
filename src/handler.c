@@ -119,11 +119,16 @@ void syscallHandler(void) {
                 break;
             }
             default:
+                debugln("Entro nel default con %p", current->p_s.lr);
+                debugln("&pcb: %p", current);
+                debugln("sysbk_new: %p", current->sysbk_new);
                 if (current->sysbk_new == NULL) {
+                    debugln("Terminating process");
                     terminateProcess(current);
                     start();
                 } else {  // Unnecessary but increases readibility
-                    current->sysbk_old = old;
+                    debugln("Call custom syscall");
+                    *(current->sysbk_old) = *old;
                     LDST(current->sysbk_new);
                 }
         }
@@ -200,7 +205,7 @@ void trapHandler(void) {
         terminateProcess(current);
         start();
     } else {
-        current->trap_old = old;
+        *(current->trap_old) = *old;
         LDST(current->trap_new);
     }
 }
@@ -212,7 +217,7 @@ void tlbExceptionHandler(void) {
         terminateProcess(current);
         start();
     } else {
-        current->tlb_old = old;
+        *(current->tlb_old) = *old;
         LDST(current->tlb_new);
     }
 }

@@ -67,6 +67,7 @@
 typedef unsigned int devregtr;
 typedef unsigned int cpu_t;
 typedef unsigned int pid_t;
+typedef unsigned int memaddr;
 
 /* if these are not defined */
 /* typedef U32 cpu_t; */
