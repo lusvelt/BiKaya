@@ -249,7 +249,7 @@ void test() {
 
     SYSCALL(CREATEPROCESS, (int)&p5state, DEFAULT_PRIORITY, 0); /* start p5		*/
 
-    SYSCALL(CREATEPROCESS, (int)&p6state, DEFAULT_PRIORITY, 0); /* start p6		*/
+    //SYSCALL(CREATEPROCESS, (int)&p6state, DEFAULT_PRIORITY, 0); /* start p6		*/
 
     SYSCALL(VERHOGEN, (int)&blkp7, 0, 0);
 
@@ -528,9 +528,8 @@ void p4b() {
 /*p5 -- high level syscall without initializing trap vector*/
 void p5() {
     print_test("p5 starts (and hopefully dies)\n");
-
-    SYSCALL(13, 0, 0, 0); /* should cause termination because p5 has no
-                                                                                                   trap vector */
+    print_test("p5 calling syscall 13\n");
+    SYSCALL(13, 0, 0, 0); /* should cause termination because p5 has no trap vector */
 
     print_test("error: p5 alive after SYS13() with no trap vector\n");
 

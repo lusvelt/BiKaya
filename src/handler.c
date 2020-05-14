@@ -119,9 +119,10 @@ void syscallHandler(void) {
                 break;
             }
             default:
-                debugln("Entro nel default con %p", current->p_s.lr);
+                // debugln("Entro nel default con %p", current->p_s.lr);
                 debugln("&pcb: %p", current);
                 debugln("sysbk_new: %p", current->sysbk_new);
+                debugln("sysbk_old: %p", current->sysbk_old);
                 if (current->sysbk_new == NULL) {
                     debugln("Terminating process");
                     terminateProcess(current);
@@ -129,6 +130,7 @@ void syscallHandler(void) {
                 } else {  // Unnecessary but increases readibility
                     debugln("Call custom syscall");
                     *(current->sysbk_old) = *old;
+                    debugln("updated sysbk_old: %p", current->sysbk_old);
                     LDST(current->sysbk_new);
                 }
         }

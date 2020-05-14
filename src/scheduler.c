@@ -103,7 +103,8 @@ void killProgeny(pcb_t *pid) {
     outBlocked(pid);  //remove from semaphores (no need for V()
                       //because value changes after process resumes)
 
-    outProcQ(&readyQueue, pid);  //remove from readyQueue
+    if (outProcQ(&readyQueue, pid))  //remove from readyQueue
+        freePcb(pid);
 }
 
 pcb_t *getCurrent() {
