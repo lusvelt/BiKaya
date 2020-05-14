@@ -40,7 +40,11 @@ void start(void) {
         debugln();
     }
 #endif
-
+    // TODO: idle process handling makes no sense. we can either:
+    // - treat it as a normal process and just skip a timeslice when,
+    //   due to aging, it becomes the one with highest priority
+    // - add a check in aging(), (which entails making all processes
+    //   identifiable (how?)), to keep it always lowest priority.
     if (proc == NULL) {
         idle = allocPcb();
         debugln("proc is NULL, idle allocated (%p)", idle);
