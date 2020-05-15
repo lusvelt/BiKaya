@@ -125,7 +125,7 @@ void printReadyQueue() {
             if (idle == it) {
                 debug("-> idle ");
             } else {
-                debug("-> %p(lr = %p, pc = %p) ", it, it->p_s.lr, it->p_s.pc);
+                debug("-> %p(lr = %p, pc = %p, prior = %d - %d) ", it, it->p_s.lr, it->p_s.pc, it->priority, it->original_priority);
             }
         }
         debugln();

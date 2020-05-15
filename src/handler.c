@@ -205,7 +205,7 @@ void interruptHandler(void) {
         handleInterrupt(IL_TERMINAL);
     }
 
-    printReadyQueue();
+    // printReadyQueue();
     // if head didn't change... peculiar pattern. to be investigated.
     // we may want to include this check in start
     if (current == getCurrent())
