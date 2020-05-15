@@ -35,7 +35,7 @@ syscall_ret_t terminateProcess(pcb_t *pid) {
         pid = getCurrent();
     if (pid == NULL)
         return SYSCALL_FAILURE;
-    println("about to kill %p", pid);
+
     killProgeny(pid);
     return SYSCALL_SUCCESS;
 }
@@ -68,7 +68,6 @@ bool passeren(int *semaddr, pcb_t *pid) {
 void waitIo(uint32_t command, devreg_t *reg, bool subdev) {
     pcb_t *current = getCurrent();
     int *semKey = getDeviceSemKey(reg);
-    debugln("%p waitsio on semaphore %p", current, semKey);
     SET_COMMAND(reg, subdev, command);
     *semKey = 0;
     removeHeadFromReadyQueue();

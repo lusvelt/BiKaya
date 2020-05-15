@@ -76,7 +76,6 @@ void syscallHandler(void) {
                 int priority = REG_GET(old, A2);
                 void **cpid = REG_GET(old, A3);
                 SYSCALL_RETURN(old, createProcess(state, priority, cpid));
-                printReadyQueue();
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -86,7 +85,6 @@ void syscallHandler(void) {
             case TERMINATEPROCESS: {
                 pcb_t *pid = REG_GET(old, A1);
                 SYSCALL_RETURN(old, terminateProcess(pid));
-                TRACE_SYSCALL("%p terminates process %p", current, pid);
                 if (pid)
                     LDST(old);  // No need to go through scheduler since process is using its time slice fairly
                 else
@@ -96,7 +94,6 @@ void syscallHandler(void) {
             case VERHOGEN: {
                 int *semaddr = REG_GET(old, A1);
                 verhogen(semaddr);
-                TRACE_SYSCALL("%p verhoges %p", current, semaddr);
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -106,7 +103,6 @@ void syscallHandler(void) {
             case PASSEREN: {
                 int *semaddr = REG_GET(old, A1);
                 int blocked = passeren(semaddr, current);
-                TRACE_SYSCALL("%p passeres %p", current, semaddr);
                 if (blocked)
                     start();
                 else
@@ -118,7 +114,6 @@ void syscallHandler(void) {
                 uint32_t *reg = REG_GET(old, A2);
                 bool subdev = REG_GET(old, A3);
                 waitIo(command, reg, subdev);
-                TRACE_SYSCALL("%p waitsio", current);
                 start();
                 break;
             }
@@ -127,7 +122,10 @@ void syscallHandler(void) {
                 state_t *spuOld = REG_GET(old, A2);
                 state_t *spuNew = REG_GET(old, A3);
                 SYSCALL_RETURN(old, specPassUp(type, spuOld, spuNew));
-                LDST(old);
+                if (current == getCurrent())
+                    LDST(old);
+                else
+                    start();
                 break;
             }
             case GETPID: {
@@ -144,13 +142,11 @@ void syscallHandler(void) {
                 debugln("sysbk_old: %p", current->sysbk_old);
                 if (current->sysbk_new == NULL) {
                     terminateProcess(NULL);
-                    printReadyQueue();
                     start();
                 } else {  // Unnecessary but increases readibility
                     debugln("Call custom syscall");
                     *(current->sysbk_old) = *old;
                     debugln("updated sysbk_old: %p (lr = %p)", current->sysbk_old, current->sysbk_old->lr);
-                    printReadyQueue();
                     LDST(current->sysbk_new);
                 }
         }
@@ -213,7 +209,6 @@ void interruptHandler(void) {
         handleInterrupt(IL_TERMINAL);
 
     // printReadyQueue();
-    TRACE_SYSCALL("%p inside interrupt handler with cause %p", current, cause);
     // if head didn't change... peculiar pattern. to be investigated.
     // we may want to include this check in start
     if (current == getCurrent())
