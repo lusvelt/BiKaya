@@ -6,12 +6,15 @@
 #include "system.h"
 #include "terminal.h"
 
+void nop() {}
+
 // this macro sets state to state found in old, to avoid
 // discrepancies between last known state and real state
 // only internal use
 #define ENTER_HANDLER(oldarea)         \
     pcb_t *current = getCurrent();     \
     state_t *old = (state_t *)oldarea; \
+    nop();                             \
     current->p_s = *old;               \
     old = &current->p_s
 
@@ -37,10 +40,12 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
 }
 
 #define TRACE_SYSCALL(fmt, ...)      \
-    do {                             \
+    {                                \
+        uint32_t time = getTIMER();  \
         debugln(fmt, ##__VA_ARGS__); \
         printReadyQueue();           \
-    } while (0);
+        setTIMER(time);              \
+    }
 
 void syscallHandler(void) {
     ENTER_HANDLER(SYSBK_OLDAREA);
@@ -81,7 +86,7 @@ void syscallHandler(void) {
             case TERMINATEPROCESS: {
                 pcb_t *pid = REG_GET(old, A1);
                 SYSCALL_RETURN(old, terminateProcess(pid));
-                printReadyQueue();
+                TRACE_SYSCALL("%p terminates process %p", current, pid);
                 if (pid)
                     LDST(old);  // No need to go through scheduler since process is using its time slice fairly
                 else
@@ -91,6 +96,7 @@ void syscallHandler(void) {
             case VERHOGEN: {
                 int *semaddr = REG_GET(old, A1);
                 verhogen(semaddr);
+                TRACE_SYSCALL("%p verhoges %p", current, semaddr);
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -100,6 +106,7 @@ void syscallHandler(void) {
             case PASSEREN: {
                 int *semaddr = REG_GET(old, A1);
                 int blocked = passeren(semaddr, current);
+                TRACE_SYSCALL("%p passeres %p", current, semaddr);
                 if (blocked)
                     start();
                 else
@@ -111,6 +118,7 @@ void syscallHandler(void) {
                 uint32_t *reg = REG_GET(old, A2);
                 bool subdev = REG_GET(old, A3);
                 waitIo(command, reg, subdev);
+                TRACE_SYSCALL("%p waitsio", current);
                 start();
                 break;
             }
@@ -201,11 +209,11 @@ void interruptHandler(void) {
         handleInterrupt(IL_ETHERNET);
     if (INT_IS_PENDING(cause, IL_PRINTER))
         handleInterrupt(IL_ETHERNET);
-    if (INT_IS_PENDING(cause, IL_TERMINAL)) {
+    if (INT_IS_PENDING(cause, IL_TERMINAL))
         handleInterrupt(IL_TERMINAL);
-    }
 
     // printReadyQueue();
+    TRACE_SYSCALL("%p inside interrupt handler with cause %p", current, cause);
     // if head didn't change... peculiar pattern. to be investigated.
     // we may want to include this check in start
     if (current == getCurrent())

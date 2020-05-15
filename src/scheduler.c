@@ -108,8 +108,8 @@ void killProgeny(pcb_t *pid) {
     outBlocked(pid);
 
     // remove from readyQueue
-    if (outProcQ(&readyQueue, pid))
-        freePcb(pid);
+    outProcQ(&readyQueue, pid);
+    freePcb(pid);
 }
 
 pcb_t *getCurrent() {
@@ -125,7 +125,7 @@ void printReadyQueue() {
             if (idle == it) {
                 debug("-> idle ");
             } else {
-                debug("-> %p(lr = %p, pc = %p, prior = %d - %d) ", it, it->p_s.lr, it->p_s.pc, it->priority, it->original_priority);
+                debug("-> %p(lr = %p, st = %p, prior = %d - %d) ", it, it->p_s.lr, &it->p_s, it->priority, it->original_priority);
             }
         }
         debugln();

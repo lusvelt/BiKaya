@@ -510,7 +510,7 @@ void p4b() {
 
     SYSCALL(VERHOGEN, (int)&endp4, 0, 0); /* V(endp4) */
 
-    print_test("p4 - try to redefine PGMVECT, it will cause p4 termination\n");
+    print_test("4p4 - try to redefine PGMVECT, it will cause p4 termination\n");
     /* should cause a termination       */
     /* since this has already been      */
     /* done for PROGTRAPs               */
@@ -527,7 +527,7 @@ void p4b() {
 
 /*p5 -- high level syscall without initializing trap vector*/
 void p5() {
-    print_test("p5 starts (and hopefully dies)\n");
+    print_test("5p5 starts (and hopefully dies)\n");
     SYSCALL(13, 0, 0, 0); /* should cause termination because p5 has no trap vector */
 
     print_test("error: p5 alive after SYS13() with no trap vector\n");
