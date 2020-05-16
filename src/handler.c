@@ -39,12 +39,14 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
     }
 }
 
-#define TRACE_SYSCALL(fmt, ...)      \
-    {                                \
-        uint32_t time = getTIMER();  \
-        debugln(fmt, ##__VA_ARGS__); \
-        printReadyQueue();           \
-        setTIMER(time);              \
+#define TRACE_SYSCALL(fmt, ...)                                 \
+    {                                                           \
+        bool toReset = !(INT_IS_PENDING(getCAUSE(), IL_TIMER)); \
+        uint32_t time = getTIMER();                             \
+        debugln(fmt, ##__VA_ARGS__);                            \
+        printReadyQueue();                                      \
+        if (toReset)                                            \
+            setTIMER(time);                                     \
     }
 
 void syscallHandler(void) {
