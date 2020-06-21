@@ -13,7 +13,7 @@
  * \param key key of the semaphore
  * \return semaphore descriptor or NULL
  */
-semd_t *getSemd(int *key);
+semd_t *asl_semd(int *key);
 
 /*!
  * \brief Initiliazes the Active Semaphore List
@@ -21,7 +21,7 @@ semd_t *getSemd(int *key);
  * It initializes the ASL with all the elements
  * from the semaphore table.
  */
-void initAsl();
+void asl_init();
 
 /*!
  * \brief Inserts a process into the queue of 
@@ -37,7 +37,7 @@ void initAsl();
  * \param p inserted process
  * \returns FALSE if success, TRUE otherwise
  */
-bool insertBlocked(int *key, pcb_t *p);
+bool asl_insert_blocked(int *key, pcb_t *p);
 
 /*! 
  * \brief Removes the first PCB from the queue of the given 
@@ -52,7 +52,7 @@ bool insertBlocked(int *key, pcb_t *p);
  * \param key pointer to the semaphore descriptor.
  * \return Removed PCB.
  */
-pcb_t *removeBlocked(int *key);
+pcb_t *asl_remove_blocked(int *key);
 
 /*! 
  * \brief Removes a PCB from its queue.
@@ -66,7 +66,7 @@ pcb_t *removeBlocked(int *key);
  * \param p pointer to the PCB to remove.
  * \return Removed PCB.
  */
-pcb_t *outBlocked(pcb_t *p);
+pcb_t *asl_find_and_remove_blocked(pcb_t *p);
 
 /*! 
  * \brief Returns head PCB of a semaphore.
@@ -79,7 +79,7 @@ pcb_t *outBlocked(pcb_t *p);
  * \param key pointer to the key of a semaphore.
  * \return head PCB.
  */
-pcb_t *headBlocked(int *key);
+pcb_t *asl_blocked_head(int *key);
 
 /*! 
  * \brief Removes the tree rooted in a PCB.
@@ -88,6 +88,6 @@ pcb_t *headBlocked(int *key);
  *  from the queue of the semaphore in which it is blocked.
  * \param p pointer to the PCB.
  */
-void outChildBlocked(pcb_t *p);
+void asl_find_and_remove_blocked_child(pcb_t *p);
 
 #endif

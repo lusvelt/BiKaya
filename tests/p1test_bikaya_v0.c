@@ -154,37 +154,37 @@ void adderrbuf(char *strp) {
 int main(void) {
     int i;
 
-    initPcbs();
+    pcb_init();
     addokbuf("Initialized Process Control Blocks   \n");
 
-    /* Check allocPcb */
+    /* Check pcb_alloc */
     for (i = 0; i < MAXPROC; i++) {
-        if ((procp[i] = allocPcb()) == NULL)
-            adderrbuf("allocPcb(): unexpected NULL   ");
+        if ((procp[i] = pcb_alloc()) == NULL)
+            adderrbuf("pcb_alloc(): unexpected NULL   ");
     }
 
-    if (allocPcb() != NULL) {
-        adderrbuf(" ERROR: allocPcb(): allocated more than MAXPROC entries   ");
+    if (pcb_alloc() != NULL) {
+        adderrbuf(" ERROR: pcb_alloc(): allocated more than MAXPROC entries   ");
     }
-    addokbuf(" allocPcb test OK   \n");
+    addokbuf(" pcb_alloc test OK   \n");
 
     /* Return the last 10 entries back to free list */
     for (i = 10; i < MAXPROC; i++)
-        freePcb(procp[i]);
+        pcb_free(procp[i]);
 
     addokbuf(" Added 10 entries to the free PCB list   \n");
 
     /* Create a 10-element process queue */
     INIT_LIST_HEAD(&qa);
 
-    if (!emptyProcQ(&qa))
-        adderrbuf("ERROR: emptyProcQ(qa): unexpected FALSE   ");
+    if (!pcb_is_queue_empty(&qa))
+        adderrbuf("ERROR: pcb_is_queue_empty(qa): unexpected FALSE   ");
 
-    addokbuf("Testing insertProcQ ...   \n");
+    addokbuf("Testing pcb_insert_in_queue ...   \n");
 
     for (i = 0; i < 10; i++) {
-        if ((q = allocPcb()) == NULL)
-            adderrbuf("ERROR: allocPcb(): unexpected NULL while insert   ");
+        if ((q = pcb_alloc()) == NULL)
+            adderrbuf("ERROR: pcb_alloc(): unexpected NULL while insert   ");
         switch (i) {
             case 3:
                 q->priority = DEFAULT_PCB_PRIORITY;
@@ -202,199 +202,199 @@ int main(void) {
                 q->priority = DEFAULT_PCB_PRIORITY;
                 break;
         }
-        insertProcQ(&qa, q);
+        pcb_insert_in_queue(&qa, q);
     }
 
-    addokbuf("Test insertProcQ: OK. Inserted 10 elements \n");
+    addokbuf("Test pcb_insert_in_queue: OK. Inserted 10 elements \n");
 
-    if (emptyProcQ(&qa))
-        adderrbuf("ERROR: emptyProcQ(qa): unexpected TRUE");
+    if (pcb_is_queue_empty(&qa))
+        adderrbuf("ERROR: pcb_is_queue_empty(qa): unexpected TRUE");
 
-    /* Check outProcQ and headProcQ */
-    if (headProcQ(&qa) != maxproc)
-        adderrbuf("ERROR: headProcQ(qa) failed   ");
+    /* Check pcb_find_and_remove and pcb_queue_head */
+    if (pcb_queue_head(&qa) != maxproc)
+        adderrbuf("ERROR: pcb_queue_head(qa) failed   ");
 
     /* Removing an element from ProcQ */
-    q = outProcQ(&qa, proc);
+    q = pcb_find_and_remove(&qa, proc);
     if ((q == NULL) || (q != proc))
-        adderrbuf("ERROR: outProcQ(&qa, proc) failed to remove the entry   ");
-    freePcb(q);
+        adderrbuf("ERROR: pcb_find_and_remove(&qa, proc) failed to remove the entry   ");
+    pcb_free(q);
 
     /* Removing the first element from ProcQ */
-    q = removeProcQ(&qa);
+    q = pcb_remove_from_queue(&qa);
     if (q == NULL || q != maxproc)
-        adderrbuf("ERROR: removeProcQ(&qa, midproc) failed to remove the elements in the right order   ");
-    freePcb(q);
+        adderrbuf("ERROR: pcb_remove_from_queue(&qa, midproc) failed to remove the elements in the right order   ");
+    pcb_free(q);
 
     /* Removing other 7 elements  */
-    addokbuf(" Testing removeProcQ ...   \n");
+    addokbuf(" Testing pcb_remove_from_queue ...   \n");
     for (i = 0; i < 7; i++) {
-        if ((q = removeProcQ(&qa)) == NULL)
-            adderrbuf("removeProcQ(&qa): unexpected NULL   ");
-        freePcb(q);
+        if ((q = pcb_remove_from_queue(&qa)) == NULL)
+            adderrbuf("pcb_remove_from_queue(&qa): unexpected NULL   ");
+        pcb_free(q);
     }
 
     // Removing the last element
-    q = removeProcQ(&qa);
+    q = pcb_remove_from_queue(&qa);
     if (q != minproc)
-        adderrbuf("ERROR: removeProcQ(): failed on last entry   ");
-    freePcb(q);
+        adderrbuf("ERROR: pcb_remove_from_queue(): failed on last entry   ");
+    pcb_free(q);
 
-    if (removeProcQ(&qa) != NULL)
-        adderrbuf("ERROR: removeProcQ(&qa): removes too many entries   ");
+    if (pcb_remove_from_queue(&qa) != NULL)
+        adderrbuf("ERROR: pcb_remove_from_queue(&qa): removes too many entries   ");
 
-    if (!emptyProcQ(&qa))
-        adderrbuf("ERROR: emptyProcQ(qa): unexpected FALSE   ");
+    if (!pcb_is_queue_empty(&qa))
+        adderrbuf("ERROR: pcb_is_queue_empty(qa): unexpected FALSE   ");
 
-    addokbuf(" Test insertProcQ(), removeProcQ() and emptyProcQ(): OK   \n");
+    addokbuf(" Test pcb_insert_in_queue(), pcb_remove_from_queue() and pcb_is_queue_empty(): OK   \n");
     addokbuf(" Test process queues module: OK      \n");
 
     addokbuf(" Testing process trees...\n");
 
-    if (!emptyChild(procp[2]))
-        adderrbuf("ERROR: emptyChild: unexpected FALSE   ");
+    if (!pcb_has_no_children(procp[2]))
+        adderrbuf("ERROR: pcb_has_no_children: unexpected FALSE   ");
 
     /* make procp[1],procp[2],procp[3], procp[7] children of procp[0] */
     addokbuf("Inserting...   \n");
-    insertChild(procp[0], procp[1]);
-    insertChild(procp[0], procp[2]);
-    insertChild(procp[0], procp[3]);
-    insertChild(procp[0], procp[7]);
+    pcb_insert_child(procp[0], procp[1]);
+    pcb_insert_child(procp[0], procp[2]);
+    pcb_insert_child(procp[0], procp[3]);
+    pcb_insert_child(procp[0], procp[7]);
     addokbuf("Inserted 4 children of pcb0  \n");
 
     /* make procp[8],procp[9] children of procp[7] */
-    insertChild(procp[7], procp[8]);
-    insertChild(procp[7], procp[9]);
+    pcb_insert_child(procp[7], procp[8]);
+    pcb_insert_child(procp[7], procp[9]);
     addokbuf("Inserted 2 children of pcb7  \n");
 
-    if (emptyChild(procp[0]))
-        adderrbuf("ERROR: emptyChild(procp[0]): unexpected TRUE   ");
+    if (pcb_has_no_children(procp[0]))
+        adderrbuf("ERROR: pcb_has_no_children(procp[0]): unexpected TRUE   ");
 
-    if (emptyChild(procp[7]))
-        adderrbuf("ERROR: emptyChild(procp[7]): unexpected TRUE   ");
+    if (pcb_has_no_children(procp[7]))
+        adderrbuf("ERROR: pcb_has_no_children(procp[7]): unexpected TRUE   ");
 
-    /* Check outChild */
-    q = outChild(procp[1]);
+    /* Check pcb_find_and_remove_child */
+    q = pcb_find_and_remove_child(procp[1]);
     if (q == NULL || q != procp[1])
-        adderrbuf("ERROR: outChild(procp[1]) failed ");
+        adderrbuf("ERROR: pcb_find_and_remove_child(procp[1]) failed ");
 
-    q = outChild(procp[8]);
+    q = pcb_find_and_remove_child(procp[8]);
     if (q == NULL || q != procp[8])
-        adderrbuf("ERROR: outChild(procp[8]) failed ");
+        adderrbuf("ERROR: pcb_find_and_remove_child(procp[8]) failed ");
 
-    /* Check removeChild */
-    q = removeChild(procp[0]);
+    /* Check pcb_remove_child */
+    q = pcb_remove_child(procp[0]);
     if (q == NULL || q != procp[2])
-        adderrbuf("ERROR: removeChild(procp[0]) failed ");
+        adderrbuf("ERROR: pcb_remove_child(procp[0]) failed ");
 
-    q = removeChild(procp[7]);
+    q = pcb_remove_child(procp[7]);
     if (q == NULL || q != procp[9])
-        adderrbuf("ERROR: removeChild(procp[7]) failed ");
+        adderrbuf("ERROR: pcb_remove_child(procp[7]) failed ");
 
-    q = removeChild(procp[0]);
+    q = pcb_remove_child(procp[0]);
     if (q == NULL || q != procp[3])
-        adderrbuf("ERROR: removeChild(procp[0]) failed ");
+        adderrbuf("ERROR: pcb_remove_child(procp[0]) failed ");
 
-    q = removeChild(procp[0]);
+    q = pcb_remove_child(procp[0]);
     if (q == NULL || q != procp[7])
-        adderrbuf("ERROR: removeChild(procp[0]) failed ");
+        adderrbuf("ERROR: pcb_remove_child(procp[0]) failed ");
 
-    if (removeChild(procp[0]) != NULL)
-        adderrbuf("ERROR: removeChild(): removes too many children   ");
+    if (pcb_remove_child(procp[0]) != NULL)
+        adderrbuf("ERROR: pcb_remove_child(): removes too many children   ");
 
-    if (!emptyChild(procp[0]))
-        adderrbuf("ERROR: emptyChild(procp[0]): unexpected FALSE   ");
+    if (!pcb_has_no_children(procp[0]))
+        adderrbuf("ERROR: pcb_has_no_children(procp[0]): unexpected FALSE   ");
 
-    addokbuf("Test: insertChild(), removeChild() and emptyChild() OK   \n");
+    addokbuf("Test: pcb_insert_child(), pcb_remove_child() and pcb_has_no_children() OK   \n");
     addokbuf("Testing process tree module OK      \n");
 
-    freePcb(procp[0]);
-    freePcb(procp[1]);
-    freePcb(procp[2]);
-    freePcb(procp[3]);
-    freePcb(procp[4]);
-    freePcb(procp[5]);
-    freePcb(procp[6]);
-    freePcb(procp[7]);
-    freePcb(procp[8]);
-    freePcb(procp[9]);
+    pcb_free(procp[0]);
+    pcb_free(procp[1]);
+    pcb_free(procp[2]);
+    pcb_free(procp[3]);
+    pcb_free(procp[4]);
+    pcb_free(procp[5]);
+    pcb_free(procp[6]);
+    pcb_free(procp[7]);
+    pcb_free(procp[8]);
+    pcb_free(procp[9]);
 
     /* check ASL */
-    initAsl();
+    asl_init();
     addokbuf("Initializing active semaphore list   \n");
 
-    /* check removeBlocked and insertBlocked */
-    addokbuf(" Test insertBlocked(): test #1 started  \n");
+    /* check asl_remove_blocked and asl_insert_blocked */
+    addokbuf(" Test asl_insert_blocked(): test #1 started  \n");
     for (i = 10; i < MAXPROC; i++) {
-        procp[i] = allocPcb();
-        if (insertBlocked(&sem[i], procp[i]))
-            adderrbuf("ERROR: insertBlocked() test#1: unexpected TRUE   ");
+        procp[i] = pcb_alloc();
+        if (asl_insert_blocked(&sem[i], procp[i]))
+            adderrbuf("ERROR: asl_insert_blocked() test#1: unexpected TRUE   ");
     }
 
-    addokbuf("Test insertBlocked(): test #2 started  \n");
+    addokbuf("Test asl_insert_blocked(): test #2 started  \n");
     for (i = 0; i < 10; i++) {
-        procp[i] = allocPcb();
-        if (insertBlocked(&sem[i], procp[i]))
-            adderrbuf("ERROR:insertBlocked() test #2: unexpected TRUE   ");
+        procp[i] = pcb_alloc();
+        if (asl_insert_blocked(&sem[i], procp[i]))
+            adderrbuf("ERROR:asl_insert_blocked() test #2: unexpected TRUE   ");
     }
 
     /* check if semaphore descriptors are returned to the free list */
-    p = removeBlocked(&sem[11]);
-    if (insertBlocked(&sem[11], p))
-        adderrbuf("ERROR: removeBlocked(): fails to return to free list   ");
+    p = asl_remove_blocked(&sem[11]);
+    if (asl_insert_blocked(&sem[11], p))
+        adderrbuf("ERROR: asl_remove_blocked(): fails to return to free list   ");
 
-    if (insertBlocked(&sem[MAXSEM], procp[9]) == FALSE)
-        adderrbuf("ERROR: insertBlocked(): inserted more than MAXPROC   ");
+    if (asl_insert_blocked(&sem[MAXSEM], procp[9]) == FALSE)
+        adderrbuf("ERROR: asl_insert_blocked(): inserted more than MAXPROC   ");
 
-    addokbuf("Test removeBlocked(): test started   \n");
+    addokbuf("Test asl_remove_blocked(): test started   \n");
     for (i = 10; i < MAXPROC; i++) {
-        q = removeBlocked(&sem[i]);
+        q = asl_remove_blocked(&sem[i]);
         if (q == NULL)
-            adderrbuf("ERROR: removeBlocked(): wouldn't remove   ");
+            adderrbuf("ERROR: asl_remove_blocked(): wouldn't remove   ");
         if (q != procp[i])
-            adderrbuf("ERROR: removeBlocked(): removed wrong element   ");
+            adderrbuf("ERROR: asl_remove_blocked(): removed wrong element   ");
     }
 
-    if (removeBlocked(&sem[11]) != NULL)
-        adderrbuf("ERROR: removeBlocked(): removed nonexistent blocked proc   ");
+    if (asl_remove_blocked(&sem[11]) != NULL)
+        adderrbuf("ERROR: asl_remove_blocked(): removed nonexistent blocked proc   ");
 
-    addokbuf("Test insertBlocked() and removeBlocked() ok   \n");
+    addokbuf("Test asl_insert_blocked() and asl_remove_blocked() ok   \n");
 
-    if (headBlocked(&sem[11]) != NULL)
-        adderrbuf("ERROR: headBlocked(): nonNULL for a nonexistent queue   ");
+    if (asl_blocked_head(&sem[11]) != NULL)
+        adderrbuf("ERROR: asl_blocked_head(): nonNULL for a nonexistent queue   ");
 
-    if ((q = headBlocked(&sem[9])) == NULL)
-        adderrbuf("ERROR: headBlocked(1): NULL for an existent queue   ");
+    if ((q = asl_blocked_head(&sem[9])) == NULL)
+        adderrbuf("ERROR: asl_blocked_head(1): NULL for an existent queue   ");
     if (q != procp[9])
-        adderrbuf("ERROR: headBlocked(1): wrong process returned   ");
+        adderrbuf("ERROR: asl_blocked_head(1): wrong process returned   ");
 
-    p = outBlocked(q);
+    p = asl_find_and_remove_blocked(q);
     if (p != q)
-        adderrbuf("ERROR: outBlocked(1): couldn't remove from valid queue   ");
+        adderrbuf("ERROR: asl_find_and_remove_blocked(1): couldn't remove from valid queue   ");
 
     /* Creating a 2-layer tree */
-    insertChild(procp[0], procp[1]);
-    insertChild(procp[0], procp[2]);
-    insertChild(procp[0], procp[3]);
-    insertChild(procp[3], procp[4]);
+    pcb_insert_child(procp[0], procp[1]);
+    pcb_insert_child(procp[0], procp[2]);
+    pcb_insert_child(procp[0], procp[3]);
+    pcb_insert_child(procp[3], procp[4]);
 
-    /* Testing outChildBlocked */
-    outChildBlocked(procp[0]);
+    /* Testing asl_find_and_remove_blocked_child */
+    asl_find_and_remove_blocked_child(procp[0]);
 
-    if (headBlocked(&sem[0]) != NULL)
-        adderrbuf("ERROR: outChildBlocked(): nonNULL for a nonexistent queue (0)  ");
-    if (headBlocked(&sem[1]) != NULL)
-        adderrbuf("ERROR: outChildBlocked(): nonNULL for a nonexistent queue (1)  ");
-    if (headBlocked(&sem[2]) != NULL)
-        adderrbuf("ERROR: outChildBlocked(): nonNULL for a nonexistent queue  (2) ");
-    if (headBlocked(&sem[3]) != NULL)
-        adderrbuf("ERROR: outChildBlocked(): nonNULL for a nonexistent queue (3)  ");
-    if (headBlocked(&sem[4]) != NULL)
-        adderrbuf("ERROR: outChildBlocked(): nonNULL for a nonexistent queue (4)  ");
-    if (headBlocked(&sem[5]) == NULL)
-        adderrbuf("ERROR: outChildBlocked(): NULL for an existent queue  (5) ");
+    if (asl_blocked_head(&sem[0]) != NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): nonNULL for a nonexistent queue (0)  ");
+    if (asl_blocked_head(&sem[1]) != NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): nonNULL for a nonexistent queue (1)  ");
+    if (asl_blocked_head(&sem[2]) != NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): nonNULL for a nonexistent queue  (2) ");
+    if (asl_blocked_head(&sem[3]) != NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): nonNULL for a nonexistent queue (3)  ");
+    if (asl_blocked_head(&sem[4]) != NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): nonNULL for a nonexistent queue (4)  ");
+    if (asl_blocked_head(&sem[5]) == NULL)
+        adderrbuf("ERROR: asl_find_and_remove_blocked_child(): NULL for an existent queue  (5) ");
 
-    addokbuf("Test headBlocked() and outBlocked(): OK   \n");
+    addokbuf("Test asl_blocked_head() and asl_find_and_remove_blocked(): OK   \n");
 
     addokbuf("ASL module OK   \n");
     addokbuf("So Long and Thanks for All the Fish\n");

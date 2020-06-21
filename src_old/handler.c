@@ -49,7 +49,7 @@ HIDDEN int devFromBitmap(uint8_t bitmap) {
             setTIMER(time);                                     \
     }
 
-void syscallHandler(void) {
+void handler_syscall(void) {
     ENTER_HANDLER(SYSBK_OLDAREA);
     uint32_t cause = CAUSE_GET(old);
 
@@ -77,7 +77,7 @@ void syscallHandler(void) {
                 state_t *state = REG_GET(old, A1);
                 int priority = REG_GET(old, A2);
                 void **cpid = REG_GET(old, A3);
-                SYSCALL_RETURN(old, createProcess(state, priority, cpid));
+                SYSCALL_RETURN(old, syscall_create_process(state, priority, cpid));
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -86,7 +86,7 @@ void syscallHandler(void) {
             }
             case TERMINATEPROCESS: {
                 pcb_t *pid = REG_GET(old, A1);
-                SYSCALL_RETURN(old, terminateProcess(pid));
+                SYSCALL_RETURN(old, syscall_terminate_process(pid));
                 if (pid)
                     LDST(old);  // No need to go through scheduler since process is using its time slice fairly
                 else
@@ -95,7 +95,7 @@ void syscallHandler(void) {
             }
             case VERHOGEN: {
                 int *semaddr = REG_GET(old, A1);
-                verhogen(semaddr);
+                syscall_verhogen(semaddr);
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -104,7 +104,7 @@ void syscallHandler(void) {
             }
             case PASSEREN: {
                 int *semaddr = REG_GET(old, A1);
-                int blocked = passeren(semaddr, current);
+                int blocked = syscall_passeren(semaddr, current);
                 if (blocked)
                     start();
                 else
@@ -115,7 +115,7 @@ void syscallHandler(void) {
                 uint32_t command = REG_GET(old, A1);
                 uint32_t *reg = REG_GET(old, A2);
                 bool subdev = REG_GET(old, A3);
-                waitIo(command, reg, subdev);
+                syscall_waitio(command, reg, subdev);
                 start();
                 break;
             }
@@ -123,7 +123,7 @@ void syscallHandler(void) {
                 spu_t type = REG_GET(old, A1);
                 state_t *spuOld = REG_GET(old, A2);
                 state_t *spuNew = REG_GET(old, A3);
-                SYSCALL_RETURN(old, specPassUp(type, spuOld, spuNew));
+                SYSCALL_RETURN(old, syscall_specpassup(type, spuOld, spuNew));
                 if (current == getCurrent())
                     LDST(old);
                 else
@@ -133,7 +133,7 @@ void syscallHandler(void) {
             case GETPID: {
                 uint32_t *pid = REG_GET(old, A1);
                 uint32_t *ppid = REG_GET(old, A2);
-                getPid(current, pid, ppid);
+                syscall_getpid(current, pid, ppid);
                 LDST(old);
                 break;
             }
@@ -143,7 +143,7 @@ void syscallHandler(void) {
                 debugln("sysbk_new: %p", current->sysbk_new);
                 debugln("sysbk_old: %p", current->sysbk_old);
                 if (current->sysbk_new == NULL) {
-                    terminateProcess(NULL);
+                    syscall_terminate_process(NULL);
                     start();
                 } else {  // Unnecessary but increases readibility
                     debugln("Call custom syscall");
@@ -159,8 +159,8 @@ HIDDEN void handleInterrupt(uint8_t line) {
     uint8_t *bitmap = CDEV_BITMAP_ADDR(line);
     int dev = devFromBitmap(*bitmap);
     devreg_t *reg = DEV_REG_ADDR(line, dev);
-    int *semKey = getDeviceSemKey(reg);
-    pcb_t *p = removeBlocked(semKey);
+    int *semKey = syscall_get_device_sem_key(reg);
+    pcb_t *p = asl_remove_blocked(semKey);
 
     addToReadyQueue(p);
     *semKey = 1;  // FIXME: è giusto aggiornare manualmente il valore del semaforo?
@@ -183,7 +183,7 @@ HIDDEN void handleInterrupt(uint8_t line) {
 }
 
 // TODO: remember to set enter_kernel
-void interruptHandler(void) {
+void handler_interrupt(void) {
     ENTER_HANDLER(INT_OLDAREA);
 #ifdef TARGET_UARM
     PC_SET(old, PC_GET(old) - WORD_SIZE);
@@ -219,11 +219,11 @@ void interruptHandler(void) {
         start();
 }
 
-void trapHandler(void) {
+void handler_trap(void) {
     ENTER_HANDLER(PGMTRAP_OLDAREA);
 
     if (current->trap_new == NULL) {
-        terminateProcess(current);
+        syscall_terminate_process(current);
         start();
     } else {
         *(current->trap_old) = *old;
@@ -231,11 +231,11 @@ void trapHandler(void) {
     }
 }
 
-void tlbExceptionHandler(void) {
+void handler_tlb_exception(void) {
     ENTER_HANDLER(TLB_OLDAREA);
 
     if (current->tlb_new == NULL) {
-        terminateProcess(current);
+        syscall_terminate_process(current);
         start();
     } else {
         *(current->tlb_old) = *old;

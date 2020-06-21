@@ -1,14 +1,7 @@
 #include "syscall.h"
 
-#include "asl.h"
-#include "scheduler.h"
-#include "system.h"
-#include "terminal.h"
-
-HIDDEN int devices[8][8];
-
-syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
-    pcb_t *p = allocPcb();
+HIDDEN syscall_ret_t syscall_create_process(state_t *state, int priority, void **cpid) {
+    pcb_t *p = pcb_alloc();
 
     if (p == NULL)
         return SYSCALL_FAILURE;
@@ -18,9 +11,8 @@ syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
     p->original_priority = priority;
     p->priority = priority;
 
-    debugln("Created process %p (pc = %p)", p, p->p_s.pc);
     pcb_t *current = getCurrent();
-    insertChild(current, p);
+    pcb_insert_child(current, p);
 
     addToReadyQueue(p);
 
@@ -30,91 +22,54 @@ syscall_ret_t createProcess(state_t *state, int priority, void **cpid) {
     return SYSCALL_SUCCESS;
 }
 
-syscall_ret_t terminateProcess(pcb_t *pid) {
-    if (pid == NULL)
-        pid = getCurrent();
-    if (pid == NULL)
-        return SYSCALL_FAILURE;
+void syscall_handler(void) {
+    state_t old_state = *((state_t *)SYSBK_OLDAREA);
 
-    killProgeny(pid);
-    return SYSCALL_SUCCESS;
-}
+    if (CAUSE(old_state) == CAUSE_SYSCALL) {
+#ifdef TARGET_UMPS
+        PC(old_state) += WORD_SIZE;
+#endif
 
-syscall_ret_t verhogen(int *semaddr) {
-    semd_t *semd = getSemd(semaddr);
-    if (semd == NULL || list_empty(&semd->s_procQ)) {
-        (*semaddr)++;
-    } else {
-        pcb_t *blocked = removeBlocked(semaddr);
-        addToReadyQueue(blocked);
+        uint32_t syscall_no = SYSARG0(old_state);
+
+        switch (syscall_no) {
+            case GETCPUTIME:
+                break;
+            case CREATEPROCESS: {
+                state_t *state = SYSARG1(old_state);
+                int priority = SYSARG2(old_state);
+                void **cpid = SYSARG3(old_state);
+
+                SYSRETURN(old_state) = create_process(state, priority, cpid);
+                break;
+            }
+            case TERMINATEPROCESS: {
+                pcb_t *pid = SYSARG1(old_state);
+            }
+            case VERHOGEN: {
+                int *semaddr = SYSARG1(old_state);
+            }
+            case PASSEREN: {
+                int *semaddr = SYSARG1(old_state);
+            }
+            case WAITIO: {
+                uint32_t command = SYSARG1(old_state);
+                uint32_t *reg = SYSARG2(old_state);
+                bool subdev = SYSARG3(old_state);
+            }
+            case SPECPASSUP: {
+                spu_t type = SYSARG1(old_state);
+                state_t *spuOld = SYSARG2(old_state);
+                state_t *spuNew = SYSARG3(old_state);
+            }
+            case GETPID: {
+                uint32_t *pid = SYSARG1(old_state);
+                uint32_t *ppid = SYSARG2(old_state);
+            }
+            default:
+                break;
+        }
+
+        scheduler_resume();
     }
-    return SYSCALL_SUCCESS;
-}
-
-// Returns 1 if process has been blocked, 0 otherwise
-bool passeren(int *semaddr, pcb_t *pid) {
-    if (*semaddr) {
-        (*semaddr)--;
-        return 0;
-    } else {
-        removeHeadFromReadyQueue();
-        insertBlocked(semaddr, pid);
-        return 1;
-    }
-}
-
-#define SET_COMMAND(reg, subdev, command) (*((uint32_t *)(reg) + 1 + (2 * (1 - subdev))) = (command))
-
-void waitIo(uint32_t command, devreg_t *reg, bool subdev) {
-    pcb_t *current = getCurrent();
-    int *semKey = getDeviceSemKey(reg);
-    SET_COMMAND(reg, subdev, command);
-    *semKey = 0;
-    removeHeadFromReadyQueue();
-    if (insertBlocked(semKey, current))
-        EXIT("Too many semaphores allocated.");
-}
-
-/* This macro should only be used inside a function that returns syscall_ret_t */
-#define REGISTER_SPU_HANDLER(p, field, old, new) \
-    {                                            \
-        if (p->field##_new != NULL) {            \
-            terminateProcess(p);                 \
-            return SYSCALL_FAILURE;              \
-        }                                        \
-        p->field##_old = old;                    \
-        p->field##_new = new;                    \
-    }
-
-syscall_ret_t specPassUp(spu_t type, state_t *old, state_t *new) {
-    pcb_t *p = getCurrent();
-
-    switch (type) {
-        case SPU_SYSCALL_BRK:
-            REGISTER_SPU_HANDLER(p, sysbk, old, new);
-            break;
-        case SPU_TLB:
-            REGISTER_SPU_HANDLER(p, tlb, old, new);
-            break;
-        case SPU_TRAP:
-            REGISTER_SPU_HANDLER(p, trap, old, new);
-            break;
-    }
-    return SYSCALL_SUCCESS;
-}
-
-syscall_ret_t getPid(pcb_t *p, uint32_t *pid, uint32_t *ppid) {
-    if (pid)
-        *pid = (uint32_t)p;
-    if (ppid)
-        *ppid = (uint32_t)p->p_parent;
-    return SYSCALL_SUCCESS;
-}
-
-int *getDeviceSemKey(devreg_t *reg) {
-    int line, dev;
-    int tmp = ((uint32_t)reg - DEV_REG_START) / DEV_REG_SIZE;
-    dev = tmp % N_DEV_PER_IL;
-    line = (tmp - dev) / N_DEV_PER_IL + DEV_IL_START;
-    return &devices[line][dev];
 }

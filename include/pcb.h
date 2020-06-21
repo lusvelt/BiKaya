@@ -10,7 +10,7 @@
  * This function initializes pcbFree list in order to contain
  *  pcbTable elements.
  */
-void initPcbs(void);
+void pcb_init(void);
 
 /*! 
  * \brief Inserts a PCB to the list of free ones.
@@ -19,7 +19,7 @@ void initPcbs(void);
  *  of unallocated ones.
  * \param p pointer to the PCB to deallocate
  */
-void freePcb(pcb_t *p);
+void pcb_free(pcb_t *p);
 
 /*! 
  * \brief Removes a PCB from the free list.
@@ -28,7 +28,7 @@ void freePcb(pcb_t *p);
  * If the list is empty the function returns NULL.
  * \return removed PCB.
  */
-pcb_t *allocPcb(void);
+pcb_t *pcb_alloc(void);
 
 /*! 
  * \brief Initializes a queue.
@@ -37,7 +37,7 @@ pcb_t *allocPcb(void);
  *  dummy element.
  * \param head pointer to the dummy element.
  */
-void mkEmptyProcQ(struct list_head *head);
+void pcb_make_empty_queue(struct list_head *head);
 
 /*! 
  * \brief Controls if empty.
@@ -46,7 +46,7 @@ void mkEmptyProcQ(struct list_head *head);
  * \param head pointer to the queue.
  * \return TRUE if the queue is empty, FALSE otherwise.
  */
-bool emptyProcQ(struct list_head *head);
+bool pcb_is_queue_empty(struct list_head *head);
 
 /*! 
  * \brief Inserts a PCB into a queue.
@@ -56,7 +56,7 @@ bool emptyProcQ(struct list_head *head);
  * \param head pointer to the queue.
  * \param p pointer to the PCB to insert.
  */
-void insertProcQ(struct list_head *head, pcb_t *p);
+void pcb_insert_in_queue(struct list_head *head, pcb_t *p);
 
 /*! 
  * \brief Returns head element.
@@ -67,7 +67,7 @@ void insertProcQ(struct list_head *head, pcb_t *p);
  * \param head pointer to the queue.
  * \return head element.
  */
-pcb_t *headProcQ(struct list_head *head);
+pcb_t *pcb_queue_head(struct list_head *head);
 
 /*! 
  * \brief Removes head element.
@@ -77,7 +77,7 @@ pcb_t *headProcQ(struct list_head *head);
  * \param head pointer to the queue.
  * \return head element.
  */
-pcb_t *removeProcQ(struct list_head *head);
+pcb_t *pcb_remove_from_queue(struct list_head *head);
 
 /*! 
  * \brief Removes a PCB.
@@ -89,7 +89,7 @@ pcb_t *removeProcQ(struct list_head *head);
  * \param p pointer to the PCB to remove.
  * \return removed PCB.
  */
-pcb_t *outProcQ(struct list_head *head, pcb_t *p);
+pcb_t *pcb_find_and_remove(struct list_head *head, pcb_t *p);
 
 /*! 
  * \brief Controls if a PCB has children.
@@ -98,7 +98,7 @@ pcb_t *outProcQ(struct list_head *head, pcb_t *p);
  * \param this pointer to the PCB.
  * \return TRUE if the PCB has no children, FALSE otherwise.
  */
-bool emptyChild(pcb_t *this);
+bool pcb_has_no_children(pcb_t *this);
 
 /*! 
  * \brief Inserts a child.
@@ -108,7 +108,7 @@ bool emptyChild(pcb_t *this);
  * \param parent pointer to the PCB.
  * \param p pointer to the PCB to add as a child.
  */
-void insertChild(pcb_t *parent, pcb_t *p);
+void pcb_insert_child(pcb_t *parent, pcb_t *p);
 
 /*! 
  * \brief Removes a child.
@@ -118,7 +118,7 @@ void insertChild(pcb_t *parent, pcb_t *p);
  * \param p pointer to the PCB.
  * \return Removed child.
  */
-pcb_t *removeChild(pcb_t *p);
+pcb_t *pcb_remove_child(pcb_t *p);
 
 /*! 
  * \brief Removes a child.
@@ -128,6 +128,6 @@ pcb_t *removeChild(pcb_t *p);
  * \param p pointer to the child to remove.
  * \return Removed child.
  */
-pcb_t *outChild(pcb_t *p);
+pcb_t *pcb_find_and_remove_child(pcb_t *p);
 
 #endif

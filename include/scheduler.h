@@ -1,9 +1,11 @@
 #ifndef _SCHEDULER_H_
 #define _SCHEDULER_H_
 
-#include "const.h"
 #include "pcb.h"
+#include "system.h"
 
+void scheduler_init(pcb_code_t);
+void scheduler_resume();
 void start(void);
 void next(state_t *);
 void addToReadyQueue(pcb_t *p);

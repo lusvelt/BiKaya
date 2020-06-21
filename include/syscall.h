@@ -3,14 +3,16 @@
 
 #include "pcb.h"
 
-syscall_ret_t createProcess(state_t *state, int priority, void **cpid);
-syscall_ret_t terminateProcess(pcb_t *pid);
-syscall_ret_t verhogen(int *semaddr);
-bool passeren(int *semaddr, pcb_t *pid);
-void waitIo(uint32_t command, devreg_t *reg, bool subdev);
-syscall_ret_t specPassUp(spu_t type, state_t *old, state_t *new);
-syscall_ret_t getPid(pcb_t *p, uint32_t *pid, uint32_t *ppid);
+void syscall_handler(void);
 
-int *getDeviceSemKey(devreg_t *reg);
+syscall_ret_t syscall_create_process(state_t *state, int priority, void **cpid);
+syscall_ret_t syscall_terminate_process(pcb_t *pid);
+syscall_ret_t syscall_verhogen(int *semaddr);
+bool syscall_passeren(int *semaddr, pcb_t *pid);
+void syscall_waitio(uint32_t command, devreg_t *reg, bool subdev);
+syscall_ret_t syscall_specpassup(spu_t type, state_t *old, state_t *new);
+syscall_ret_t syscall_getpid(pcb_t *p, uint32_t *pid, uint32_t *ppid);
+
+int *syscall_get_device_sem_key(devreg_t *reg);
 
 #endif

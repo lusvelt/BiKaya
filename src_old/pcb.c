@@ -41,8 +41,8 @@ pcb_t *pcb_alloc(void) {
     // hence the inclusion of memset.h
     pcb->p_s = (state_t){0};
     pcb->start_tm = pcb->user_tm = pcb->kernel_tm = 0;
-    pcb->exc_old_areas = {0};
-    pcb->exc_new_areas = {0};
+    pcb->sysbk_old = pcb->tlb_old = pcb->trap_old = NULL;
+    pcb->sysbk_new = pcb->tlb_new = pcb->trap_new = NULL;
 
     return pcb;
 }

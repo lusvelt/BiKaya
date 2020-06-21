@@ -38,8 +38,8 @@ typedef struct pcb_t {
     time_t start_tm, user_tm, kernel_tm;
 
     /* handler fields */
-    state_t *sysbk_new, *tlb_new, *trap_new;
-    state_t *sysbk_old, *tlb_old, *trap_old;
+    state_t exc_new_areas[3];
+    state_t exc_old_areas[3];
 
 } pcb_t;
 

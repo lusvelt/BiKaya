@@ -18,7 +18,7 @@
 #define RAM_SIZE ((int)(*((int *)0x10000004)))
 #define RAM_TOP (RAM_BASE + RAM_SIZE)
 #define FRAME_SIZE 4096
-
+/*
 #define STATUS_GET(state) ((state)->status)
 #define PC_GET(state) ((state)->pc_epc)
 #define SP_GET(state) ((state)->reg_sp)
@@ -26,8 +26,14 @@
 #define STATUS_SET(state, val) ((state)->status = (val))
 #define PC_SET(state, val) ((state)->pc_epc = (uint32_t)(val))
 #define SP_SET(state, val) ((state)->reg_sp = (val))
+*/
+#define STATUS_REG(state) ((state).status)
+#define PC(state) ((state).pc_epc)
+#define SP(state) ((state).reg_sp)
+#define VM(state) ((state).status)
+#define VM_ON STATUS_VMC
+#define VM_OFF ~(VM_ON)
 
-// We set IEp instead of IEc due to shifting operations in LDST
 #define STATUS_ID 0x00000004
 // using INTERVAL timer
 #define STATUS_TIMER_ID 0x00000400
@@ -52,30 +58,38 @@
 #define SET_KERNEL_MODE(status) ((status) & ~STATUS_KUC)
 #define SET_USER_MODE(status) ((status) | STATUS_KUC)
 
-#define STATUS_VMC 0x01000000
-#define SET_VM_OFF(state)                    \
-    {                                        \
-        uint32_t status = STATUS_GET(state); \
-        status = status & ~STATUS_VMC;       \
-        STATUS_SET(state, status);           \
-    }
+// #define STATUS_VMC 0x01000000
+// #define SET_VM_OFF(state)                    \
+//     {                                        \
+//         uint32_t status = STATUS_GET(state); \
+//         status = status & ~STATUS_VMC;       \
+//         STATUS_SET(state, status);           \
+//     }
 
-#define SET_VM_ON(state)                     \
-    {                                        \
-        uint32_t status = STATUS_GET(state); \
-        status = status | STATUS_VMC;        \
-        STATUS_SET(state, status);           \
-    }
+// #define SET_VM_ON(state)                     \
+//     {                                        \
+//         uint32_t status = STATUS_GET(state); \
+//         status = status | STATUS_VMC;        \
+//         STATUS_SET(state, status);           \
+//     }
 
-#define CAUSE_GET(state) ((state)->cause)
-#define CAUSE_IS_SYSCALL(cause) (CAUSE_GET_EXCCODE(cause) == EXC_SYS)
+// #define CAUSE_GET(state) ((state)->cause)
+// #define CAUSE_IS_SYSCALL(cause) (CAUSE_GET_EXCCODE(cause) == EXC_SYS)
 #define CAUSE_GET_LINE(cause) (((cause) >> 8) & 0xFF)
 
-#define A0 a0
-#define A1 a1
-#define A2 a2
-#define A3 a3
-#define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))
+#define CAUSE(state) (CAUSE_GET_EXCCODE((state).cause))
+#define CAUSE_SYSCALL EXC_SYS
+
+// #define A0 a0
+// #define A1 a1
+// #define A2 a2
+// #define A3 a3
+// #define REG_GET(state, reg) (*((uint32_t *)((state)->gpr + reg - 1)))
+
+#define SYSARG0(state) ((state).a0)
+#define SYSARG1(state) ((state).a1)
+#define SYSARG2(state) ((state).a2)
+#define SYSARG3(state) ((state).a3)
 
 #define SET_TIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))
 #define INT_IS_PENDING(cause, line) CAUSE_IP(line) & (cause)
@@ -101,3 +115,4 @@
 #define getTODHI() (*((uint32_t *)BUS_TODHI))
 
 #define SYSCALL_RETURN(state, val) (*((uint32_t *)((state)->gpr + v0 - 1)) = (val))
+#define SYSRETURN(state) (*((uint32_t *)((state)->gpr + v0 - 1)))
