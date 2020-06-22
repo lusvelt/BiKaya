@@ -1,16 +1,28 @@
 #ifndef _MACRO_H_
 #define _MACRO_H_
 
-#define INIT_NEW_AREA(addr, handler)             \
-    {                                            \
-        state_t *area = (state_t *)addr;         \
-        PC_SET(area, handler);                   \
-        SP_SET(area, RAM_TOP);                   \
-        uint32_t status = STATUS_GET(area);      \
-        status = STATUS_ALL_INT_DISABLE(status); \
-        status = SET_KERNEL_MODE(status);        \
-        STATUS_SET(area, status);                \
-        SET_VM_OFF(area);                        \
+#include "arch.h"
+#include "terminal.h"
+
+#define INIT_NEW_AREA(area, handler)                                 \
+    {                                                                \
+        state_t state = *((state_t *)area);                          \
+        PC(state) = handler;                                         \
+        SP(state) = RAM_TOP;                                         \
+        STATUS(state) = KERNEL_MODE(state) | ALL_INT_DISABLE(state); \
+        VM(state) &= VM_OFF;                                         \
+    }
+
+#define EXIT(msg, ...)               \
+    {                                \
+        println(msg, ##__VA_ARGS__); \
+        PANIC();                     \
+    }
+
+#define HALT(msg, ...)               \
+    {                                \
+        println(msg, ##__VA_ARGS__); \
+        HALT();                      \
     }
 
 #endif

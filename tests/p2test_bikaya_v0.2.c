@@ -54,9 +54,10 @@
 #define VMOFF (~VMON)
 
 #define CAUSE_CODE(s) CAUSE_EXCCODE_GET(s.CP15_Cause)
-#define SP(s) s.sp
-#define PC(s) s.pc
-#define VM(s) s.CP15_Control
+// commenting already defined macros
+// #define SP(s) s.sp
+// #define PC(s) s.pc
+// #define VM(s) s.CP15_Control
 #define REG0(s) s.a1
 #endif
 
@@ -66,7 +67,7 @@
 typedef unsigned int memaddr;
 typedef unsigned int devregtr;
 typedef unsigned int cpu_t;
-typedef unsigned int pid_t;
+//typedef unsigned int pid_t;
 
 /* if these are not defined */
 /* typedef U32 cpu_t; */

@@ -1,9 +1,9 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
-
 #ifdef TARGET_UMPS
 #include "umps/types.h"
-#elif TARGET_UARM
+#endif
+#ifdef TARGET_UARM
 #define UARM_MACHINE_COMPILING
 #include "uarm/uARMtypes.h"
 #endif
@@ -38,13 +38,13 @@ typedef struct pcb_t {
     time_t start_tm, user_tm, kernel_tm;
 
     /* handler fields */
-    state_t *exc_new_areas[3];
-    state_t *exc_old_areas[3];
+    state_t exc_new_areas[3];
+    state_t exc_old_areas[3];
 
 } pcb_t;
 
 typedef void (*pcb_code_t)(void);
-typedef pcb_t *pid_t;
+typedef unsigned int pid_t;
 
 // Semaphore Descriptor (SEMD) data structure
 typedef struct semd_t {
@@ -58,6 +58,11 @@ typedef struct semd_t {
 } semd_t;
 
 typedef uint8_t bool;
+
+typedef enum {
+    SYSCALL_SUCCESS = 0,
+    SYSCALL_FAILURE = -1
+} syscall_ret_t;
 
 typedef enum {
     GETCPUTIME = 1,

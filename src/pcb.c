@@ -2,7 +2,6 @@
 
 #include "const.h"
 #include "memory.h"
-#include "terminal.h"
 
 // only relevant to this file, so HIDDEN (static)
 HIDDEN pcb_t pcbTable[MAXPROC];
@@ -41,8 +40,8 @@ pcb_t *pcb_alloc(void) {
     // hence the inclusion of memset.h
     pcb->p_s = (state_t){0};
     pcb->start_tm = pcb->user_tm = pcb->kernel_tm = 0;
-    pcb->exc_old_areas = {0};
-    pcb->exc_new_areas = {0};
+    memset(pcb->exc_old_areas, 0, sizeof(state_t *) * 3);
+    memset(pcb->exc_new_areas, 0, sizeof(state_t *) * 3);
 
     return pcb;
 }
@@ -88,6 +87,15 @@ pcb_t *pcb_remove_from_queue(struct list_head *head) {
     list_del(&(pcb->p_next));
 
     return pcb;
+}
+
+bool pcb_is_free(pcb_t *p) {
+    struct pcb_t *iterator;
+
+    list_for_each_entry(iterator, &pcbFree, p_next) {
+        if (iterator == p) return TRUE;
+    }
+    return FALSE;
 }
 
 pcb_t *pcb_find_and_remove(struct list_head *head, pcb_t *p) {

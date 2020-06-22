@@ -1,7 +1,7 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
-#include "arch.h"
+#include "system.h"
 
 //#define DEBUG
 
@@ -43,10 +43,5 @@
 
 /* interrupt lines */
 #define INT_BITMAP(line) (1 << (line))
-
-/* spec pass up types */
-#define SPECPASSUP_SYSBK_TYPE (0)
-#define SPECPASSUP_TLB_TYPE (1)
-#define SPECPASSUP_TRAP_TYPE (2)
 
 #endif

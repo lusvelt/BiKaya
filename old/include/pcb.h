@@ -79,8 +79,6 @@ pcb_t *pcb_queue_head(struct list_head *head);
  */
 pcb_t *pcb_remove_from_queue(struct list_head *head);
 
-bool pcb_is_free(pcb_t *p);
-
 /*! 
  * \brief Removes a PCB.
  * 
