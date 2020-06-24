@@ -8,21 +8,19 @@
 LIST_HEAD(ready_queue);
 pcb_t *current_proc = NULL;
 
+HIDDEN state_t idle_proc_state;
+
 HIDDEN void idle_process_code(void) {
     while (1)
         WAIT();
 }
 
 void scheduler_init(pcb_code_t code) {
-    pcb_t *idle_proc = pcb_alloc();
-    STST(&idle_proc->p_s);
-    PC(idle_proc->p_s) = (uint32_t)idle_process_code;
-    STATUS(idle_proc->p_s) = KERNEL_MODE(idle_proc->p_s);
-    STATUS(idle_proc->p_s) = ALL_INT_ENABLE(idle_proc->p_s);
-    VM(idle_proc->p_s) &= VM_OFF;
-
-    idle_proc->original_priority = idle_proc->priority = IDLE_PRIORITY;
-    pcb_insert_in_queue(&ready_queue, idle_proc);
+    STST(&idle_proc_state);
+    PC(idle_proc_state) = (uint32_t)idle_process_code;
+    STATUS(idle_proc_state) = KERNEL_MODE(idle_proc_state);
+    STATUS(idle_proc_state) = ALL_INT_ENABLE(idle_proc_state);
+    VM(idle_proc_state) &= VM_OFF;
 
     pcb_t *init_proc = pcb_alloc();
     STST(&init_proc->p_s);
@@ -43,8 +41,11 @@ HIDDEN void aging() {
     }
 }
 
-void scheduler_resume(bool time_slice_ended) {
+void scheduler_resume(bool time_slice_ended, state_t *old_state) {
     if (current_proc) {
+        if (old_state)
+            memcpy(&current_proc->p_s, old_state, sizeof(state_t));
+
         if (!time_slice_ended)
             LDST(&current_proc->p_s);
 
@@ -56,13 +57,15 @@ void scheduler_resume(bool time_slice_ended) {
         pcb_insert_in_queue(&ready_queue, current_proc);
     }
 
+    if (pcb_is_queue_empty(&ready_queue))
+        LDST(&idle_proc_state);
+
     scheduler_run();
 }
 
 void scheduler_run() {
     // retrieve next process to execute
     current_proc = pcb_remove_from_queue(&ready_queue);
-    debugln("current_proc = %p", current_proc->p_next);
 
     // reset timeslice
     setTIMER(TIME_SLICE);

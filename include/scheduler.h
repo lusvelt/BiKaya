@@ -5,6 +5,6 @@
 
 void scheduler_init(pcb_code_t);
 void scheduler_run();
-void scheduler_resume(bool time_slice_ended);
+void scheduler_resume(bool time_slice_ended, state_t *old_state);
 
 #endif

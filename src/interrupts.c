@@ -62,13 +62,14 @@ HIDDEN void handle_interrupt(uint8_t line) {
 }
 
 void interrupts_handler(void) {
-    memcpy(&current_proc->p_s, (state_t *)INT_OLDAREA, sizeof(state_t));
+    state_t old_state;
+    memcpy(&old_state, (state_t *)INT_OLDAREA, sizeof(state_t));
 
-    uint32_t cause = CAUSE(current_proc->p_s);
+    uint32_t cause = CAUSE(old_state);
     bool time_slice_ended = FALSE;
 
 #ifdef TARGET_UARM
-    PC(current_proc->p_s) -= WORD_SIZE;
+    PC(old_state) -= WORD_SIZE;
 #endif
 
     if (INT_IS_PENDING(cause, IL_TIMER)) {
@@ -91,7 +92,7 @@ void interrupts_handler(void) {
     if (INT_IS_PENDING(cause, IL_TERMINAL))
         handle_interrupt(IL_TERMINAL);
 
-    scheduler_resume(time_slice_ended);
+    scheduler_resume(time_slice_ended, &old_state);
 }
 
 // given a device register (and optionally a term boolean to account for

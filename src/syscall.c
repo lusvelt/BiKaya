@@ -17,10 +17,12 @@
 extern struct list_head ready_queue;
 extern pcb_t *current_proc;
 
-HIDDEN int create_process(state_t *state, int priority, pid_t *cpid) {
+HIDDEN void create_process(state_t *state, int priority, pid_t *cpid) {
     pcb_t *new_proc = pcb_alloc();
-    if (new_proc == NULL)
-        return SYSCALL_FAILURE;
+    if (new_proc == NULL) {
+        SYSRETURN(current_proc->p_s) = SYSCALL_FAILURE;
+        return;
+    }
 
     memcpy(&new_proc->p_s, state, sizeof(state_t));
     new_proc->original_priority = new_proc->priority = priority;
@@ -30,7 +32,7 @@ HIDDEN int create_process(state_t *state, int priority, pid_t *cpid) {
 
     if (cpid) *cpid = new_proc;
 
-    return SYSCALL_SUCCESS;
+    SYSRETURN(current_proc->p_s) = SYSCALL_SUCCESS;
 }
 
 HIDDEN void kill_progeny(pid_t pid) {
@@ -50,14 +52,17 @@ HIDDEN void kill_progeny(pid_t pid) {
     pcb_free(pid);
 }
 
-HIDDEN int terminate_process(pid_t pid) {
-    if (pcb_is_free(pid)) return SYSCALL_FAILURE;
+void terminate_process(pid_t pid) {
+    if (pcb_is_free(pid)) {
+        SYSRETURN(current_proc->p_s) = SYSCALL_FAILURE;
+    } else {
+        kill_progeny(pid);
 
-    kill_progeny(pid);
-    if (pid == current_proc)
-        current_proc = NULL;
-
-    return SYSCALL_SUCCESS;
+        if (pid != current_proc)
+            SYSRETURN(current_proc->p_s) = SYSCALL_SUCCESS;
+        else
+            current_proc = NULL;
+    }
 }
 
 HIDDEN void verhogen(int *semaddr) {
@@ -92,23 +97,20 @@ HIDDEN void wait_io(uint32_t command, devreg_t *dev_reg, bool subdev) {
     SET_COMMAND(dev_reg, subdev, command);
 
     int *dev_sem_key = interrupts_get_dev_key(dev_reg, subdev);
-    debugln("device_semkey = %p", dev_sem_key);
     if (asl_insert_blocked(dev_sem_key, current_proc)) {
         EXIT("Too many semaphores allocated.");
     }
     current_proc = NULL;
 }
 
-HIDDEN int spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
-    if (current_proc->exc_new_areas[exc_type]) {
+HIDDEN void spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
+    if (current_proc->exc_new_areas[exc_type])
         terminate_process(current_proc);
-        return SYSCALL_FAILURE;
-    }
 
     current_proc->exc_new_areas[exc_type] = new_area;
     current_proc->exc_old_areas[exc_type] = old_area;
 
-    return SYSCALL_SUCCESS;
+    SYSRETURN(current_proc->p_s) = SYSCALL_SUCCESS;
 }
 
 void syscalls_handler(void) {
@@ -128,14 +130,14 @@ void syscalls_handler(void) {
                 int proc_priority = SYSARG2(current_proc->p_s);
                 pid_t *cpid = (pid_t *)SYSARG3(current_proc->p_s);
 
-                SYSRETURN(current_proc->p_s) = create_process(proc_state, proc_priority, cpid);
+                create_process(proc_state, proc_priority, cpid);
                 break;
             }
             case TERMINATEPROCESS: {
                 pid_t pid = (pid_t)SYSARG1(current_proc->p_s);
                 if (pid == NULL) pid = current_proc;
 
-                SYSRETURN(current_proc->p_s) = terminate_process(pid);
+                terminate_process(pid);
                 break;
             }
             case VERHOGEN:
@@ -150,7 +152,7 @@ void syscalls_handler(void) {
                 wait_io((uint32_t)SYSARG1(current_proc->p_s), (devreg_t *)SYSARG2(current_proc->p_s), (bool)SYSARG3(current_proc->p_s));
                 break;
             case SPECPASSUP:
-                SYSRETURN(current_proc->p_s) = spec_pass_up(SYSARG1(current_proc->p_s), (state_t *)SYSARG2(current_proc->p_s), (state_t *)SYSARG3(current_proc->p_s));
+                spec_pass_up(SYSARG1(current_proc->p_s), (state_t *)SYSARG2(current_proc->p_s), (state_t *)SYSARG3(current_proc->p_s));
                 break;
             case GETPID: {
                 pid_t *pid = (pid_t *)SYSARG1(current_proc->p_s);
@@ -158,6 +160,7 @@ void syscalls_handler(void) {
 
                 pid_t *ppid = (pid_t *)SYSARG2(current_proc->p_s);
                 if (ppid) *ppid = current_proc->p_parent;
+                break;
             }
             default:
                 if (current_proc->exc_new_areas[SPECPASSUP_SYSBK_TYPE]) {
@@ -170,5 +173,5 @@ void syscalls_handler(void) {
         }
     }
 
-    scheduler_resume(FALSE);
+    scheduler_resume(FALSE, NULL);
 }
