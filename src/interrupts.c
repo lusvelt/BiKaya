@@ -14,30 +14,32 @@
 // requests, 5 for reception)
 HIDDEN int devices_semkeys[N_EXT_IL + 1][N_DEV_PER_IL];
 extern struct list_head ready_queue;
+extern pcb_t *current_proc;
 
 HIDDEN inline void unblock_process(int *semkey, uint32_t status) {
     pcb_t *unblocked = asl_remove_blocked(semkey);
+    unblocked->priority = unblocked->original_priority;
     pcb_insert_in_queue(&ready_queue, unblocked);
     SYSRETURN(unblocked->p_s) = status;
 }
 
 HIDDEN void handle_dtp(dtpreg_t *device) {
-    device->command = CMD_ACK;
     int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, FALSE);
     unblock_process(dev_sem_key, device->status);
+    device->command = CMD_ACK;
 }
 
 HIDDEN void handle_term(termreg_t *device) {
-    if (TX_STATUS(device) != ST_BUSY) {
-        device->transm_command = CMD_ACK;
+    if (TX_STATUS(device) == ST_TRANSMITTED) {
         int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, FALSE);
-        unblock_process(dev_sem_key, TX_STATUS(device));
+        unblock_process(dev_sem_key, device->transm_status);
+        device->transm_command = CMD_ACK;
     }
     // cannot be mutually exclusive as both are concurrent and independent
-    if (RX_STATUS(device) != ST_BUSY) {
-        device->recv_command = CMD_ACK;
+    if (RX_STATUS(device) == ST_RECEIVED) {
         int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, TRUE);
-        unblock_process(dev_sem_key, RX_STATUS(device));
+        unblock_process(dev_sem_key, device->recv_status);
+        device->recv_command = CMD_ACK;
     }
 }
 
@@ -60,14 +62,13 @@ HIDDEN void handle_interrupt(uint8_t line) {
 }
 
 void interrupts_handler(void) {
-    state_t old_state;
-    memcpy(&old_state, (state_t *)INT_OLDAREA, sizeof(state_t));
+    memcpy(&current_proc->p_s, (state_t *)INT_OLDAREA, sizeof(state_t));
 
-    uint32_t cause = CAUSE(old_state);
+    uint32_t cause = CAUSE(current_proc->p_s);
     bool time_slice_ended = FALSE;
 
 #ifdef TARGET_UARM
-    PC(old_state) -= WORD_SIZE;
+    PC(current_proc->p_s) -= WORD_SIZE;
 #endif
 
     if (INT_IS_PENDING(cause, IL_TIMER)) {
@@ -90,7 +91,7 @@ void interrupts_handler(void) {
     if (INT_IS_PENDING(cause, IL_TERMINAL))
         handle_interrupt(IL_TERMINAL);
 
-    scheduler_resume(&old_state, time_slice_ended);
+    scheduler_resume(time_slice_ended);
 }
 
 // given a device register (and optionally a term boolean to account for

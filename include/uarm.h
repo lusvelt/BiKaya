@@ -12,8 +12,9 @@
 #define USER_MODE(state) (STATUS(state) | STATUS_USER_MODE)
 
 #define CAUSE_SYSCALL EXC_SYSCALL
+#define CAUSE_BREAKPOINT EXC_BREAKPOINT
 #define CAUSE(state) ((state).CP15_Cause)
-#define CAUSE_EXC(state) (CAUSE_EXCCODE_GET(CAUSE(state))
+#define CAUSE_EXC(state) (CAUSE_EXCCODE_GET(CAUSE(state)))
 
 #define SYSARG0(state) ((state).a1)
 #define SYSARG1(state) ((state).a2)

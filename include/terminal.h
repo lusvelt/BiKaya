@@ -27,8 +27,8 @@ int tputchar(termreg_t *term, int c);  // Print character `c` to terminal `term`
 void tputs(termreg_t *term, const char *str);
 
 // Thanks to ##__VA_ARGS__ we can omit the variadic part
-#define print(fmt, ...) tprintf(TERM_0, fmt, ##__VA_ARGS__)
-#define println(fmt, ...) print(fmt "\n", ##__VA_ARGS__)
+#define printf(fmt, ...) tprintf(TERM_0, fmt, ##__VA_ARGS__)
+#define printfln(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 void tprintf(termreg_t *term, const char *fmt, ...);
 
 #ifdef DEBUG

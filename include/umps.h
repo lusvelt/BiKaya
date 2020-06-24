@@ -28,6 +28,7 @@
 #define USER_MODE(state) (STATUS(state) | STATUS_KUc)
 
 #define CAUSE_SYSCALL EXC_SYS
+#define CAUSE_BREAKPOINT EXC_BP
 #define CAUSE(state) ((state).cause)
 #define CAUSE_EXC(state) (CAUSE_GET_EXCCODE(CAUSE(state)))
 

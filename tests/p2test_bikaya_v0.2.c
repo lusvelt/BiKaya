@@ -152,6 +152,8 @@ unsigned int set_sp_pc_status(state_t *s, state_t *copy, unsigned int pc) {
 #endif
 }
 
+#include "terminal.h"
+
 /* a procedure to print on terminal 0 */
 void print(char *msg) {
     unsigned int command;
@@ -171,11 +173,15 @@ void print(char *msg) {
 
         /*		PANIC(); */
 
-        if ((status & TERMSTATMASK) != TRANSM)
+        if ((status & TERMSTATMASK) != TRANSM) {
+            debugln("1");
             PANIC();
+        }
 
-        if (((status & TERMCHARMASK) >> BYTELEN) != *s)
+        if (((status & TERMCHARMASK) >> BYTELEN) != *s) {
+            debugln("2");
             PANIC();
+        }
 
         s++;
     }

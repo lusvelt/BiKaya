@@ -67,6 +67,7 @@ HIDDEN void verhogen(int *semaddr) {
     // frees semd as soon as its queue becomes empty
     if (semd) {
         pcb_t *blocked = asl_remove_blocked(semaddr);
+        blocked->priority = blocked->original_priority;
         pcb_insert_in_queue(&ready_queue, blocked);
     } else {
         *semaddr += 1;
@@ -90,8 +91,9 @@ HIDDEN void passeren(int *semaddr) {
 HIDDEN void wait_io(uint32_t command, devreg_t *dev_reg, bool subdev) {
     SET_COMMAND(dev_reg, subdev, command);
 
-    int *device_semkey = interrupts_get_dev_key(dev_reg, subdev);
-    if (asl_insert_blocked(device_semkey, current_proc)) {
+    int *dev_sem_key = interrupts_get_dev_key(dev_reg, subdev);
+    debugln("device_semkey = %p", dev_sem_key);
+    if (asl_insert_blocked(dev_sem_key, current_proc)) {
         EXIT("Too many semaphores allocated.");
     }
     current_proc = NULL;
@@ -110,58 +112,56 @@ HIDDEN int spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
 }
 
 void syscalls_handler(void) {
-    state_t old_state;
-    memcpy(&old_state, (state_t *)SYSBK_OLDAREA, sizeof(state_t));
+    memcpy(&current_proc->p_s, (state_t *)SYSBK_OLDAREA, sizeof(state_t));
 
-    if (CAUSE(old_state) == CAUSE_SYSCALL) {
+    if (CAUSE_EXC(current_proc->p_s) == CAUSE_SYSCALL) {
 #ifdef TARGET_UMPS
-        PC(old_state) += WORD_SIZE;
+        PC(current_proc->p_s) += WORD_SIZE;
 #endif
 
-        int syscall_no = SYSARG0(old_state);
-
+        int syscall_no = SYSARG0(current_proc->p_s);
         switch (syscall_no) {
             case GETCPUTIME:
                 break;
             case CREATEPROCESS: {
-                state_t *proc_state = (state_t *)SYSARG1(old_state);
-                int proc_priority = SYSARG2(old_state);
-                pid_t *cpid = (pid_t *)SYSARG3(old_state);
+                state_t *proc_state = (state_t *)SYSARG1(current_proc->p_s);
+                int proc_priority = SYSARG2(current_proc->p_s);
+                pid_t *cpid = (pid_t *)SYSARG3(current_proc->p_s);
 
-                SYSRETURN(old_state) = create_process(proc_state, proc_priority, cpid);
+                SYSRETURN(current_proc->p_s) = create_process(proc_state, proc_priority, cpid);
                 break;
             }
             case TERMINATEPROCESS: {
-                pid_t pid = (pid_t)SYSARG1(old_state);
+                pid_t pid = (pid_t)SYSARG1(current_proc->p_s);
                 if (pid == NULL) pid = current_proc;
 
-                SYSRETURN(old_state) = terminate_process(pid);
+                SYSRETURN(current_proc->p_s) = terminate_process(pid);
                 break;
             }
             case VERHOGEN:
                 // If a process with higher priority than current one appears after
                 // verhogen it doesn't stop current process.
-                verhogen((int *)SYSARG1(old_state));
+                verhogen((int *)SYSARG1(current_proc->p_s));
                 break;
             case PASSEREN:
-                passeren((int *)SYSARG1(old_state));
+                passeren((int *)SYSARG1(current_proc->p_s));
                 break;
             case WAITIO:
-                wait_io((uint32_t)SYSARG1(old_state), (devreg_t *)SYSARG2(old_state), (bool)SYSARG3(old_state));
+                wait_io((uint32_t)SYSARG1(current_proc->p_s), (devreg_t *)SYSARG2(current_proc->p_s), (bool)SYSARG3(current_proc->p_s));
                 break;
             case SPECPASSUP:
-                SYSRETURN(old_state) = spec_pass_up(SYSARG1(old_state), (state_t *)SYSARG2(old_state), (state_t *)SYSARG3(old_state));
+                SYSRETURN(current_proc->p_s) = spec_pass_up(SYSARG1(current_proc->p_s), (state_t *)SYSARG2(current_proc->p_s), (state_t *)SYSARG3(current_proc->p_s));
                 break;
             case GETPID: {
-                pid_t *pid = (pid_t *)SYSARG1(old_state);
+                pid_t *pid = (pid_t *)SYSARG1(current_proc->p_s);
                 if (pid) *pid = current_proc;
 
-                pid_t *ppid = (pid_t *)SYSARG2(old_state);
+                pid_t *ppid = (pid_t *)SYSARG2(current_proc->p_s);
                 if (ppid) *ppid = current_proc->p_parent;
             }
             default:
                 if (current_proc->exc_new_areas[SPECPASSUP_SYSBK_TYPE]) {
-                    memcpy(current_proc->exc_old_areas[SPECPASSUP_SYSBK_TYPE], &old_state, sizeof(state_t));
+                    memcpy(current_proc->exc_old_areas[SPECPASSUP_SYSBK_TYPE], &current_proc->p_s, sizeof(state_t));
                     LDST(current_proc->exc_new_areas[SPECPASSUP_SYSBK_TYPE]);
                 } else {
                     terminate_process(current_proc);
@@ -170,5 +170,5 @@ void syscalls_handler(void) {
         }
     }
 
-    scheduler_resume(&old_state, FALSE);
+    scheduler_resume(FALSE);
 }
