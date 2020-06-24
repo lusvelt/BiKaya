@@ -11,10 +11,10 @@
 extern void test();
 
 int main(void) {
-    INIT_NEW_AREA(INT_NEWAREA, interrupts_handler);
-    INIT_NEW_AREA(TLB_NEWAREA, tlb_exception_handler);
-    INIT_NEW_AREA(PGMTRAP_NEWAREA, trap_exception_handler);
-    INIT_NEW_AREA(SYSBK_NEWAREA, syscalls_handler);
+    INIT_NEW_AREA((state_t *)INT_NEWAREA, interrupts_handler);
+    INIT_NEW_AREA((state_t *)TLB_NEWAREA, tlb_exception_handler);
+    INIT_NEW_AREA((state_t *)PGMTRAP_NEWAREA, trap_exception_handler);
+    INIT_NEW_AREA((state_t *)SYSBK_NEWAREA, syscalls_handler);
 
     pcb_init();
     asl_init();

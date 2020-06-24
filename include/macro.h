@@ -7,12 +7,11 @@
 
 #define INIT_NEW_AREA(area, handler)                                 \
     {                                                                \
-        state_t state;                                               \
-        memcpy(&state, (state_t *)area, sizeof(state_t));            \
-        PC(state) = (uint32_t)handler;                               \
-        SP(state) = RAM_TOP;                                         \
-        STATUS(state) = KERNEL_MODE(state) | ALL_INT_DISABLE(state); \
-        VM(state) &= VM_OFF;                                         \
+        memset(area, 0, sizeof(state_t));                            \
+        PC(*area) = (uint32_t)handler;                               \
+        SP(*area) = RAM_TOP;                                         \
+        STATUS(*area) = KERNEL_MODE(*area) | ALL_INT_DISABLE(*area); \
+        VM(*area) &= VM_OFF;                                         \
     }
 
 #define EXIT(msg, ...)               \
