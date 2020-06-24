@@ -14,7 +14,7 @@ HIDDEN void idle_process_code(void) {
 void scheduler_init(pcb_code_t code) {
     pcb_t *idle_proc = pcb_alloc();
     STST(&idle_proc->p_s);
-    PC(idle_proc->p_s) = idle_process_code;
+    PC(idle_proc->p_s) = (uint32_t)idle_process_code;
     STATUS(idle_proc->p_s) = KERNEL_MODE(idle_proc->p_s) | ALL_INT_ENABLE(idle_proc->p_s);
     VM(idle_proc->p_s) &= VM_OFF;
 
@@ -24,7 +24,7 @@ void scheduler_init(pcb_code_t code) {
     pcb_t *init_proc = pcb_alloc();
     STST(&init_proc->p_s);
     SP(init_proc->p_s) = RAM_TOP - FRAME_SIZE;
-    PC(init_proc->p_s) = code;
+    PC(init_proc->p_s) = (uint32_t)code;
     STATUS(init_proc->p_s) = KERNEL_MODE(init_proc->p_s) | ALL_INT_ENABLE(init_proc->p_s);
     VM(init_proc->p_s) &= VM_OFF;
 
@@ -36,6 +36,8 @@ void scheduler_init(pcb_code_t code) {
 
 void scheduler_resume() {
     // general skeleton, to be checked
+    //if(age) aging();
+
     if (current_proc) {
         LDST(current_proc);
     } else {

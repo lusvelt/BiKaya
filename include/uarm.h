@@ -25,3 +25,6 @@
 #define ALL_INT_DISABLE(state) (STATUS_ALL_INT_DISABLE(STATUS(state)))
 
 #define INT_IS_PENDING(cause, line) CAUSE_IP_GET((cause), (line))
+#define TERM_0_ADDR (0x00000240)
+// no need for lower bound as device pointers are from DEV_REG_ADDR
+#define IS_TERMINAL(device) ((uint32_t)device >= TERM_0_ADDR)

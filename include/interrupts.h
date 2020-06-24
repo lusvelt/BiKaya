@@ -4,6 +4,6 @@
 #include "types.h"
 
 void interrupts_handler(void);
-int *interrupts_get_dev_key(devreg_t *);
+int *interrupts_get_dev_key(devreg_t *, bool);
 
 #endif

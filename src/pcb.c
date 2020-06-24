@@ -27,21 +27,22 @@ pcb_t *pcb_alloc(void) {
 
     list_del(next);
     pcb_t *pcb = container_of(next, pcb_t, p_next);
+    memset(pcb, 0, sizeof(pcb_t));
 
     //initialize fields
     INIT_LIST_HEAD(&(pcb->p_child));
     INIT_LIST_HEAD(&(pcb->p_next));
     INIT_LIST_HEAD(&(pcb->p_sib));
-    pcb->p_parent = NULL;
-    pcb->p_semkey = NULL;
-    pcb->priority = 0;
-    // this {0} is interpreted by compiler as
-    // memset(&pcb->p_s,0,sizeof(state_t)),
-    // hence the inclusion of memset.h
-    pcb->p_s = (state_t){0};
-    pcb->start_tm = pcb->user_tm = pcb->kernel_tm = 0;
-    memset(pcb->exc_old_areas, 0, sizeof(state_t *) * 3);
-    memset(pcb->exc_new_areas, 0, sizeof(state_t *) * 3);
+    // pcb->p_parent = NULL;
+    // pcb->p_semkey = NULL;
+    // pcb->priority = 0;
+    // // this {0} is interpreted by compiler as
+    // // memset(&pcb->p_s,0,sizeof(state_t)),
+    // // hence the inclusion of memset.h
+    // pcb->p_s = (state_t){0};
+    // pcb->start_tm = pcb->user_tm = pcb->kernel_tm = 0;
+    // memset(pcb->exc_old_areas, 0, sizeof(state_t *) * 3);
+    // memset(pcb->exc_new_areas, 0, sizeof(state_t *) * 3);
 
     return pcb;
 }

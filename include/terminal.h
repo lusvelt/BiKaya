@@ -1,7 +1,8 @@
 #ifndef _TERMINAL_H_
 #define _TERMINAL_H_
 
-#include "arch.h"
+#include "const.h"
+#include "types.h"
 
 #define CMD_TRANSMIT 2
 #define CMD_RECEIVE CMD_TRANSMIT
@@ -17,17 +18,6 @@
 
 #define ST_TRANSMITTED 5
 #define ST_RECEIVED ST_TRANSMITTED
-
-#define EXIT(msg, ...)               \
-    {                                \
-        println(msg, ##__VA_ARGS__); \
-        PANIC();                     \
-    }
-#define HALT(msg, ...)               \
-    {                                \
-        println(msg, ##__VA_ARGS__); \
-        HALT();                      \
-    }
 
 // Terminal output functions
 #define putchar(c) tputchar(TERM_0, c)

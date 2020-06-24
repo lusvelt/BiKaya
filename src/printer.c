@@ -1,4 +1,7 @@
-#include "system.h"
+#include "printer.h"
+
+#include "const.h"
+#include "types.h"
 
 #define ST_READY 1
 #define ST_BUSY 3

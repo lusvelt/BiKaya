@@ -31,10 +31,10 @@
 #define CAUSE(state) ((state).cause)
 #define CAUSE_EXC(state) (CAUSE_GET_EXCCODE(CAUSE(state)))
 
-#define SYSARG0(state) ((state).a0)
-#define SYSARG1(state) ((state).a1)
-#define SYSARG2(state) ((state).a2)
-#define SYSARG3(state) ((state).a3)
+#define SYSARG0(state) ((state).reg_a0)
+#define SYSARG1(state) ((state).reg_a1)
+#define SYSARG2(state) ((state).reg_a2)
+#define SYSARG3(state) ((state).reg_a3)
 #define SYSRETURN(state) ((state).reg_v0)
 
 // STATUS_IEp globally enables/disables all interrupts
@@ -43,6 +43,9 @@
 #define ALL_INT_ENABLE(state) (STATUS(state) | STATUS_IM_MASK)
 
 #define INT_IS_PENDING(cause, line) ((cause)&CAUSE_IP(line))
+#define TERM_0_ADDR (0x10000250)
+// no need for lower bound as device pointers are from DEV_REG_ADDR
+#define IS_TERMINAL(device) ((uint32_t)device >= TERM_0_ADDR)
 
 #define getTODLO() (*((uint32_t *)BUS_TODLOW))
 #define getTODHI() (*((uint32_t *)BUS_TODHI))

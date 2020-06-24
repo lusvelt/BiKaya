@@ -1,10 +1,6 @@
 #include "terminal.h"
 
 #include <stdarg.h>
-#include <stdint.h>
-
-#include "const.h"
-#include "system.h"
 
 int tputchar(termreg_t *term, int c) {
     uint32_t stat;

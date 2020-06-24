@@ -7,6 +7,8 @@
 #include "macro.h"
 #include "memory.h"
 #include "pcb.h"
+#include "scheduler.h"
+#include "terminal.h"
 #include "types.h"
 
 #define SYSCALL_SUCCESS (0)
@@ -14,7 +16,6 @@
 
 extern struct list_head ready_queue;
 extern pcb_t *current_proc;
-extern void scheduler_resume();
 
 HIDDEN int create_process(state_t *state, int priority, pid_t *cpid) {
     pcb_t *new_proc = pcb_alloc();
@@ -86,7 +87,7 @@ HIDDEN void passeren(int *semaddr) {
 HIDDEN void wait_io(uint32_t command, devreg_t *dev_reg, bool subdev) {
     SET_COMMAND(dev_reg, subdev, command);
 
-    int *device_semkey = interrupts_get_dev_key(dev_reg);
+    int *device_semkey = interrupts_get_dev_key(dev_reg, subdev);
     if (asl_insert_blocked(device_semkey, current_proc)) {
         EXIT("Too many semaphores allocated.");
     }
@@ -105,14 +106,15 @@ HIDDEN int spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
 }
 
 void syscalls_handler(void) {
-    state_t old_state = *((state_t *)SYSBK_OLDAREA);
+    state_t old_state;
+    memcpy(&old_state, (state_t *)SYSBK_OLDAREA, sizeof(state_t));
 
     if (CAUSE(old_state) == CAUSE_SYSCALL) {
 #ifdef TARGET_UMPS
         PC(old_state) += WORD_SIZE;
 #endif
 
-        syscall_t syscall_no = SYSARG0(old_state);
+        int syscall_no = SYSARG0(old_state);
 
         switch (syscall_no) {
             case GETCPUTIME:

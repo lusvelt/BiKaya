@@ -3,6 +3,7 @@
 #include "exceptions.h"
 #include "interrupts.h"
 #include "macro.h"
+#include "memory.h"
 #include "pcb.h"
 #include "scheduler.h"
 #include "syscall.h"

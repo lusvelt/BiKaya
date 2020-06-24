@@ -23,7 +23,8 @@
 #ifdef TARGET_UMPS
 #include "umps/arch.h"
 #include "umps/libumps.h"
-#include "umps/types.h"
+#include "umps/uMPStypes.h"
+#define EXC_BUSINVFETCH EXC_IBE
 #define FRAME_SIZE 4096
 /* Elapsed clock ticks (CPU instructions executed) since system power on.
    Only the "low" part is actually used. */
@@ -33,11 +34,11 @@
 #define VMON 0x07000000
 #define VMOFF (~VMON)
 
-#define getTODLO() (*((unsigned int *)BUS_TODLOW))
+// #define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
-#define SP(s) s.reg_sp
-#define PC(s) s.pc_epc
-#define VM(s) s.status
+// #define SP(s) s.reg_sp
+// #define PC(s) s.pc_epc
+// #define VM(s) s.status
 #define REG0(s) s.reg_a0
 #define STATUS_ALL_INT_ENABLE(x) (x | (0xFF << 8))
 #define CAUSE_EXCCODE_GET(cause) ((cause >> 2) & 0x1F)

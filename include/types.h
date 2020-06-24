@@ -2,7 +2,7 @@
 #define _TYPES_H_
 
 #ifdef TARGET_UMPS
-#include "umps/types.h"
+#include "umps/uMPStypes.h"
 #elif TARGET_UARM
 #define UARM_MACHINE_COMPILING
 #include "uarm/uARMtypes.h"

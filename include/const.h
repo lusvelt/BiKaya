@@ -40,9 +40,7 @@
 #define TIME_SLICE_MS 3000
 #define TIME_SCALE *((uint32_t *)BUS_REG_TIME_SCALE)
 #define TIME_SLICE (TIME_SLICE_MS * (TIME_SCALE))
-
-/* interrupt lines */
-#define INT_BITMAP(line) (1 << (line))
+#define TIMER_ACK (0xFFFFFFFF)
 
 /* spec pass up types */
 #define SPECPASSUP_SYSBK_TYPE (0)
