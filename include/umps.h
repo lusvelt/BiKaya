@@ -41,7 +41,7 @@
 // STATUS_IEp globally enables/disables all interrupts
 // STATUS_IM_MASK enables/disables a specific set of interrupts
 #define ALL_INT_DISABLE(state) (STATUS(state) & ~STATUS_IEp)
-#define ALL_INT_ENABLE(state) (STATUS(state) | STATUS_IM_MASK)
+#define ALL_INT_ENABLE(state) (STATUS(state) | STATUS_IM_MASK | STATUS_IEp)
 
 #define INT_IS_PENDING(cause, line) ((cause)&CAUSE_IP(line))
 #define TERM_0_ADDR (0x10000250)
@@ -51,7 +51,3 @@
 #define getTODLO() (*((uint32_t *)BUS_TODLOW))
 #define getTODHI() (*((uint32_t *)BUS_TODHI))
 #define setTIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))
-
-// I don't think these are necessary
-//#define INT_LOWEST 3    /* minimum interrupt number used by real devices */
-//#define DEV_USED_INTS 5 /* Number of ints reserved for devices: 3,4,5,6,7 */

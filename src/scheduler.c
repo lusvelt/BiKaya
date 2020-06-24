@@ -43,15 +43,13 @@ HIDDEN void aging() {
 
 void scheduler_resume(bool time_slice_ended, state_t *old_state) {
     if (current_proc) {
-        if (old_state)
-            memcpy(&current_proc->p_s, old_state, sizeof(state_t));
-
         if (!time_slice_ended)
-            LDST(&current_proc->p_s);
+            LDST(old_state);
 
         if (!pcb_is_queue_empty(&ready_queue))
             aging();
 
+        memcpy(&current_proc->p_s, old_state, sizeof(state_t));
         // We reset current process priority to avoid inflated priority
         current_proc->priority = current_proc->original_priority;
         pcb_insert_in_queue(&ready_queue, current_proc);

@@ -4,6 +4,6 @@
 #include "types.h"
 
 void syscalls_handler(void);
-void terminate_process(pid_t pid);
+int terminate_process(pid_t pid);
 
 #endif
