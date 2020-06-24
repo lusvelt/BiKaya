@@ -64,7 +64,7 @@ void interrupts_handler(void) {
     memcpy(&old_state, (state_t *)INT_OLDAREA, sizeof(state_t));
 
     uint32_t cause = CAUSE(old_state);
-    bool reset_time_slice = FALSE;
+    bool time_slice_ended = FALSE;
 
 #ifdef TARGET_UARM
     PC(old_state) -= WORD_SIZE;
@@ -72,7 +72,7 @@ void interrupts_handler(void) {
 
     if (INT_IS_PENDING(cause, IL_TIMER)) {
         setTIMER(TIMER_ACK);  // ack interrupt, timeslice will be set in sched
-        reset_time_slice = TRUE;
+        time_slice_ended = TRUE;
     }
 
     if (INT_IS_PENDING(cause, IL_DISK))
@@ -90,7 +90,7 @@ void interrupts_handler(void) {
     if (INT_IS_PENDING(cause, IL_TERMINAL))
         handle_interrupt(IL_TERMINAL);
 
-    scheduler_resume(reset_time_slice);
+    scheduler_resume(&old_state, time_slice_ended);
 }
 
 // given a device register (and optionally a term boolean to account for

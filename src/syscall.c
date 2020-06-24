@@ -54,6 +54,9 @@ HIDDEN int terminate_process(pid_t pid) {
     if (pcb_is_free(pid)) return SYSCALL_FAILURE;
 
     kill_progeny(pid);
+    if (pid == current_proc)
+        current_proc = NULL;
+
     return SYSCALL_SUCCESS;
 }
 
@@ -91,6 +94,7 @@ HIDDEN void wait_io(uint32_t command, devreg_t *dev_reg, bool subdev) {
     if (asl_insert_blocked(device_semkey, current_proc)) {
         EXIT("Too many semaphores allocated.");
     }
+    current_proc = NULL;
 }
 
 HIDDEN int spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
@@ -131,11 +135,12 @@ void syscalls_handler(void) {
                 pid_t pid = (pid_t)SYSARG1(old_state);
                 if (pid == NULL) pid = current_proc;
 
-                //TODO: check that pid exists (i.e. if it belongs to some queue)
                 SYSRETURN(old_state) = terminate_process(pid);
                 break;
             }
             case VERHOGEN:
+                // If a process with higher priority than current one appears after
+                // verhogen it doesn't stop current process.
                 verhogen((int *)SYSARG1(old_state));
                 break;
             case PASSEREN:
@@ -163,7 +168,7 @@ void syscalls_handler(void) {
                 }
                 break;
         }
-
-        scheduler_resume();
     }
+
+    scheduler_resume(&old_state, FALSE);
 }

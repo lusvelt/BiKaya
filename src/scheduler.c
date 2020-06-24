@@ -1,6 +1,7 @@
 #include "scheduler.h"
 
 #include "const.h"
+#include "memory.h"
 #include "pcb.h"
 
 LIST_HEAD(ready_queue);
@@ -30,21 +31,38 @@ void scheduler_init(pcb_code_t code) {
 
     init_proc->original_priority = init_proc->priority = DEFAULT_PRIORITY;
     pcb_insert_in_queue(&ready_queue, init_proc);
-
-    scheduler_resume();
 }
 
-void scheduler_resume() {
-    // general skeleton, to be checked
-    //if(age) aging();
+HIDDEN void aging() {
+    pcb_t *it;
+    list_for_each_entry(it, &ready_queue, p_next) {
+        it->priority++;
+    }
+}
 
+void scheduler_resume(state_t *current_proc_state, bool time_slice_ended) {
     if (current_proc) {
-        LDST(current_proc);
-    } else {
-        // reset timeslice
-        // current_proc = pippamelodallaqueue;
+        memcpy(&current_proc->p_s, current_proc_state, sizeof(state_t));
+
+        if (!time_slice_ended)
+            LDST(current_proc_state);
+
         // We reset current process priority to avoid inflated priority
         current_proc->priority = current_proc->original_priority;
-        setTIMER(TIME_SLICE);
+        aging();
+        pcb_insert_in_queue(&ready_queue, current_proc);
     }
+
+    scheduler_run();
+}
+
+void scheduler_run() {
+    // retrieve next process to execute
+    current_proc = pcb_remove_from_queue(&ready_queue);
+
+    // reset timeslice
+    setTIMER(TIME_SLICE);
+
+    // load next process state
+    LDST(&current_proc->p_s);
 }

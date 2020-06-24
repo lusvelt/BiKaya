@@ -21,5 +21,7 @@ int main(void) {
 
     scheduler_init(test);
 
+    scheduler_run();
+
     return 0;
 }
