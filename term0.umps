@@ -1,0 +1,60 @@
+p1 v(testsem)
+p2 was started
+p2 starts
+p2 v/p pairs successfully
+error: not enough cpu time went by
+p2 blew it!
+p1 knows p2 ended
+first incarnation of p3 starts
+p3 create a new p3
+second incarnation of p3 starts
+p3 termination of the child
+p3 is OK
+p3 termination after the child
+p1 knows p3 ended
+p4 starts
+p4 - try to cause a pgm trap access some non-existent memory
+pgmTrapHandler - Access non-existent memory
+p4a - try to generate a TLB exception
+memory management (tlb) trap
+p4 - try call sys13 to verify pass up
+p4b - Invoking custom system call 13
+Custom system call handler called successfully; continuing...
+p4 - try to redefine PGMVECT, it will cause p4 termination
+p1 knows p4 ended
+p5 starts (and hopefully dies)
+p6 starts (and hopefully dies)
+p7root starts
+child1 starts
+child2 starts
+leaf process starts
+leaf process starts
+leaf process starts
+leaf process starts
+Leaves created, now terminating...
+p7root starts
+child1 starts
+child2 starts
+leaf process starts
+leaf process starts
+leaf process starts
+leaf process starts
+Leaves created, now terminating...
+p7root starts
+child1 starts
+child2 starts
+leaf process starts
+leaf process starts
+leaf process starts
+leaf process starts
+Leaves created, now terminating...
+p7root starts
+child1 starts
+child2 starts
+leaf process starts
+leaf process starts
+leaf process starts
+leaf process starts
+Leaves created, now terminating...
+
+p1 finishes OK -- TTFN

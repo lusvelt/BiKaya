@@ -12,7 +12,7 @@ TEST_DIR := ./tests
 # Sources
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 ifdef TEST
-	SRCS += $(TEST_DIR)/p2test_bikaya_v0.2.c
+	SRCS += $(TEST_DIR)/p2test_bikaya_v0.3.c
 endif
 
 # Objects
