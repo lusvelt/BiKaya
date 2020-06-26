@@ -13,8 +13,7 @@ uint32_t switch_tick;
 HIDDEN state_t idle_proc_state;
 
 HIDDEN void idle_process_code(void) {
-    while (1)
-        WAIT();
+    WAIT();
 }
 
 void scheduler_init(pcb_code_t code) {
@@ -50,6 +49,7 @@ void scheduler_account_time(bool kernel) {
         else
             current_proc->user_tm += getTODLO() - switch_tick;
     }
+
     switch_tick = getTODLO();
 }
 
@@ -126,15 +126,15 @@ HIDDEN void kill_tree(pid_t pid) {
 }
 
 void scheduler_kill_process(pid_t pid) {
-    if (pid == NULL)
-        pid = current_proc;
-
     if (pid == current_proc)
         current_proc = NULL;
 
     kill_tree(pid);
 }
 
+// although not exactly scheduler's job, it allows us to keep
+// current_process local to scheduler and syscall. in a more
+// complex kernel, we'd move it to a "system" file
 void scheduler_handle_exception(int type, state_t *old_state) {
     scheduler_account_time(FALSE);
 
@@ -143,7 +143,7 @@ void scheduler_handle_exception(int type, state_t *old_state) {
         scheduler_account_time(TRUE);
         LDST(current_proc->exc_new_areas[type]);
     } else {
-        scheduler_kill_process(NULL);
+        scheduler_kill_process(current_proc);
         scheduler_resume(FALSE, NULL);
     }
 }
