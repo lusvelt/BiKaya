@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void interrupts_handler(void);
-int *interrupts_get_dev_key(devreg_t *, bool);
+void interrupt_handler(void);
+int *interrupt_get_dev_key(devreg_t *, bool);
 
 #endif

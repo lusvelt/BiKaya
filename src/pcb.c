@@ -27,6 +27,8 @@ pcb_t *pcb_alloc(void) {
 
     list_del(next);
     pcb_t *pcb = container_of(next, pcb_t, p_next);
+
+    // Clocks are set to null so that wallclock can be set in scheduler at first activation
     memset(pcb, 0, sizeof(pcb_t));
 
     //initialize fields

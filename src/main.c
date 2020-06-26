@@ -6,15 +6,15 @@
 #include "memory.h"
 #include "pcb.h"
 #include "scheduler.h"
-#include "syscall.h"
+#include "syscalls.h"
 
 extern void test();
 
 int main(void) {
-    INIT_NEW_AREA((state_t *)INT_NEWAREA, interrupts_handler);
+    INIT_NEW_AREA((state_t *)INT_NEWAREA, interrupt_handler);
     INIT_NEW_AREA((state_t *)TLB_NEWAREA, tlb_exception_handler);
     INIT_NEW_AREA((state_t *)PGMTRAP_NEWAREA, trap_exception_handler);
-    INIT_NEW_AREA((state_t *)SYSBK_NEWAREA, syscalls_handler);
+    INIT_NEW_AREA((state_t *)SYSBK_NEWAREA, syscall_handler);
 
     pcb_init();
     asl_init();

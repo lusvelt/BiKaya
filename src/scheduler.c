@@ -1,5 +1,6 @@
 #include "scheduler.h"
 
+#include "asl.h"
 #include "const.h"
 #include "memory.h"
 #include "pcb.h"
@@ -7,6 +8,7 @@
 
 LIST_HEAD(ready_queue);
 pcb_t *current_proc = NULL;
+uint32_t switch_tick;
 
 HIDDEN state_t idle_proc_state;
 
@@ -41,8 +43,20 @@ HIDDEN void aging() {
     }
 }
 
+void scheduler_account_time(bool kernel) {
+    if (current_proc) {
+        if (kernel)
+            current_proc->kernel_tm += getTODLO() - switch_tick;
+        else
+            current_proc->user_tm += getTODLO() - switch_tick;
+    }
+    switch_tick = getTODLO();
+}
+
 void scheduler_resume(bool time_slice_ended, state_t *old_state) {
     if (current_proc) {
+        scheduler_account_time(TRUE);
+
         if (!time_slice_ended)
             LDST(old_state);
 
@@ -65,9 +79,71 @@ void scheduler_run() {
     // retrieve next process to execute
     current_proc = pcb_remove_from_queue(&ready_queue);
 
+    // If the process is being activated for the first time, we set its start time
+    if (!current_proc->start_tm)
+        current_proc->start_tm = getTODLO();
+
+    // remember the tick before exiting kernel
+    switch_tick = getTODLO();
+
     // reset timeslice
     setTIMER(TIME_SLICE);
 
     // load next process state
     LDST(&current_proc->p_s);
+}
+
+void scheduler_enqueue_process(pcb_t *proc, bool is_child) {
+    proc->priority = proc->original_priority;
+    pcb_insert_in_queue(&ready_queue, proc);
+
+    if (is_child)
+        pcb_insert_child(current_proc, proc);
+}
+
+void scheduler_block_current(int *semaddr, state_t *proc_state) {
+    memcpy(&current_proc->p_s, proc_state, sizeof(state_t));
+    scheduler_account_time(TRUE);
+    asl_insert_blocked(semaddr, current_proc);
+    current_proc = NULL;
+}
+
+HIDDEN void kill_tree(pid_t pid) {
+    pid_t it;
+    list_for_each_entry(it, &pid->p_child, p_sib) {
+        kill_tree(it);
+    }
+
+    pcb_find_and_remove_child(pid);
+
+    // remove from semaphores (no need for V()
+    // because value changes after process resumes)
+    asl_find_and_remove_blocked(pid);
+
+    // remove from readyQueue
+    pcb_find_and_remove(&ready_queue, pid);
+    pcb_free(pid);
+}
+
+void scheduler_kill_process(pid_t pid) {
+    if (pid == NULL)
+        pid = current_proc;
+
+    if (pid == current_proc)
+        current_proc = NULL;
+
+    kill_tree(pid);
+}
+
+void scheduler_handle_exception(int type, state_t *old_state) {
+    scheduler_account_time(FALSE);
+
+    if (current_proc->exc_new_areas[type]) {
+        memcpy(current_proc->exc_old_areas[type], old_state, sizeof(state_t));
+        scheduler_account_time(TRUE);
+        LDST(current_proc->exc_new_areas[type]);
+    } else {
+        scheduler_kill_process(NULL);
+        scheduler_resume(FALSE, NULL);
+    }
 }

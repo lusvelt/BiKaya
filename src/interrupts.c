@@ -4,7 +4,7 @@
 #include "const.h"
 #include "memory.h"
 #include "pcb.h"
-#include "scheduler.h"  // <-- are these supposed to be in interrupts.h ?
+#include "scheduler.h"
 #include "terminal.h"
 #include "types.h"
 
@@ -13,31 +13,28 @@
 // a column to account for it (i.e index 4 is for transmission
 // requests, 5 for reception)
 HIDDEN int devices_semkeys[N_EXT_IL + 1][N_DEV_PER_IL];
-extern struct list_head ready_queue;
-extern pcb_t *current_proc;
 
 HIDDEN inline void unblock_process(int *semkey, uint32_t status) {
     pcb_t *unblocked = asl_remove_blocked(semkey);
-    unblocked->priority = unblocked->original_priority;
-    pcb_insert_in_queue(&ready_queue, unblocked);
+    scheduler_enqueue_process(unblocked, FALSE);
     SYSRETURN(unblocked->p_s) = status;
 }
 
 HIDDEN void handle_dtp(dtpreg_t *device) {
-    int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, FALSE);
+    int *dev_sem_key = interrupt_get_dev_key((devreg_t *)device, FALSE);
     unblock_process(dev_sem_key, device->status);
     device->command = CMD_ACK;
 }
 
 HIDDEN void handle_term(termreg_t *device) {
     if (TX_STATUS(device) == ST_TRANSMITTED) {
-        int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, FALSE);
+        int *dev_sem_key = interrupt_get_dev_key((devreg_t *)device, FALSE);
         unblock_process(dev_sem_key, device->transm_status);
         device->transm_command = CMD_ACK;
     }
     // cannot be mutually exclusive as both are concurrent and independent
     if (RX_STATUS(device) == ST_RECEIVED) {
-        int *dev_sem_key = interrupts_get_dev_key((devreg_t *)device, TRUE);
+        int *dev_sem_key = interrupt_get_dev_key((devreg_t *)device, TRUE);
         unblock_process(dev_sem_key, device->recv_status);
         device->recv_command = CMD_ACK;
     }
@@ -61,7 +58,8 @@ HIDDEN void handle_interrupt(uint8_t line) {
     }
 }
 
-void interrupts_handler(void) {
+void interrupt_handler(void) {
+    scheduler_account_time(FALSE);
     state_t *old_state = (state_t *)INT_OLDAREA;
 
     uint32_t cause = CAUSE(*old_state);
@@ -97,7 +95,7 @@ void interrupts_handler(void) {
 // given a device register (and optionally a term boolean to account for
 // transmission/reception for terminals), this returns the pointer to
 // the semaphore value assigned to the device
-int *interrupts_get_dev_key(devreg_t *reg, bool term_rcpt) {
+int *interrupt_get_dev_key(devreg_t *reg, bool term_rcpt) {
     // amount of devices before reg
     int dev_abs_index = ((uint32_t)reg - DEV_REG_START) / DEV_REG_SIZE;
     // position relative to a specific line, [0-7]

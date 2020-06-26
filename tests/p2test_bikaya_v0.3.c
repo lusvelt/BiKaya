@@ -27,8 +27,8 @@
 #define FRAME_SIZE 4096
 /* Elapsed clock ticks (CPU instructions executed) since system power on.
    Only the "low" part is actually used. */
-#define BUS_TODLOW 0x1000001c
-#define BUS_TODHIGH 0x10000018
+// define BUS_TODLOW 0x1000001c
+// #define BUS_TODHIGH 0x10000018
 
 #define VMON 0x07000000
 #define VMOFF (~VMON)
