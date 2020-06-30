@@ -15,7 +15,7 @@
 #define SYSCALL_FAILURE (-1)
 
 extern pcb_t *current_proc;
-state_t *old_state;
+HIDDEN state_t *old_state;
 
 HIDDEN int create_process(state_t *state, int priority, pid_t *cpid) {
     pcb_t *new_proc = pcb_alloc();
@@ -25,7 +25,8 @@ HIDDEN int create_process(state_t *state, int priority, pid_t *cpid) {
     memcpy(&new_proc->p_s, state, sizeof(state_t));
 
     new_proc->original_priority = priority;
-    scheduler_enqueue_process(new_proc, TRUE);  // This also set priority to original_priority
+    scheduler_enqueue_process(new_proc);  // This also set priority to original_priority
+    pcb_insert_child(current_proc, new_proc);
 
     if (cpid) *cpid = new_proc;
 
@@ -36,6 +37,8 @@ int terminate_process(pid_t pid) {
     if (pid == NULL)
         pid = current_proc;
 
+    // Check if pid belongs to some queue (i.e. it does not belong
+    // to the pcb free list)
     if (pcb_is_free(pid))
         return SYSCALL_FAILURE;
 
@@ -51,7 +54,8 @@ HIDDEN void verhogen(int *semaddr) {
     // frees semd as soon as its queue becomes empty
     if (semd) {
         pcb_t *blocked = asl_remove_blocked(semaddr);
-        scheduler_enqueue_process(blocked, FALSE);
+        // This also reset process priority to original_priority
+        scheduler_enqueue_process(blocked);
     } else
         *semaddr += 1;
 }
@@ -60,12 +64,14 @@ HIDDEN void passeren(int *semaddr) {
     if (*semaddr)
         *semaddr -= 1;
     else
+        // Block current process on semaphore semaddr
         scheduler_block_current(semaddr, old_state);
 }
 
 HIDDEN void wait_io(uint32_t command, devreg_t *device, bool subdev) {
     if (IS_TERMINAL(device)) {
         termreg_t *terminal = (termreg_t *)device;
+
         if (subdev)
             terminal->recv_command = command;
         else
@@ -75,7 +81,7 @@ HIDDEN void wait_io(uint32_t command, devreg_t *device, bool subdev) {
         dtp->command = command;
     }
 
-    int *dev_sem_key = interrupt_get_dev_key(device, subdev);
+    int *dev_sem_key = interrupts_get_dev_key(device, subdev);
 
     // since calling passeren would always have the same effect, we
     // skip the if and block the process right away
@@ -95,6 +101,7 @@ HIDDEN int spec_pass_up(int exc_type, state_t *old_area, state_t *new_area) {
 }
 
 void syscall_handler(void) {
+    // As usual, start by accounting user time
     scheduler_account_time(FALSE);
     old_state = (state_t *)SYSBK_OLDAREA;
 
@@ -104,6 +111,7 @@ void syscall_handler(void) {
 #endif
 
         int syscall_no = SYSARG0(*old_state);
+
         switch (syscall_no) {
             case GETCPUTIME: {  // user-kernel-wall
                 uint32_t *user = (uint32_t *)SYSARG1(*old_state);
@@ -113,6 +121,8 @@ void syscall_handler(void) {
                 *wallclock = getTODLO() - current_proc->start_tm;
                 *user = current_proc->user_tm;
 
+                // account kernel time, to return the most accurate
+                // value as possible
                 scheduler_account_time(TRUE);
                 *kernel = current_proc->kernel_tm;
                 break;
@@ -159,6 +169,7 @@ void syscall_handler(void) {
                 break;
             }
             default:
+                // Simply delegates to the scheduler passing the right exception type
                 scheduler_handle_exception(
                     SPECPASSUP_SYSBK_TYPE,
                     (state_t *)SYSBK_OLDAREA);
@@ -166,5 +177,10 @@ void syscall_handler(void) {
         }
     }
 
+    // Here, we have 2 situation possible:
+    // 1. current_proc has been blocked somewhere or terminated, so the scheduler
+    //    will have to select another process to execute
+    // 2. current_proc is alive and, theoretically, it still has time to execute
+    //    (i.e. its time slice isn't finished)
     scheduler_resume(FALSE, old_state);
 }

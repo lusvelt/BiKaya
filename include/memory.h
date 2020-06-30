@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-void *memset(void *s, int c, size_t n);
-void *memcpy(void *dest, const void *src, size_t len);
+void *memset(void *, int, size_t);
+void *memcpy(void *, const void *, size_t);
 
 #endif

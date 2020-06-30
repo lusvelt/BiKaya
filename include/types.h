@@ -59,21 +59,4 @@ typedef struct semd_t {
 
 typedef uint8_t bool;
 
-typedef enum {
-    GETCPUTIME = 1,
-    CREATEPROCESS,
-    TERMINATEPROCESS,
-    VERHOGEN,
-    PASSEREN,
-    WAITIO,
-    SPECPASSUP,
-    GETPID,
-} syscall_t;
-
-typedef enum {
-    SPU_SYSCALL_BRK = 0,
-    SPU_TLB = 1,
-    SPU_TRAP = 2
-} spu_t;
-
 #endif

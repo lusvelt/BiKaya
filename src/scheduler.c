@@ -6,10 +6,10 @@
 #include "pcb.h"
 #include "terminal.h"
 
-LIST_HEAD(ready_queue);
 pcb_t *current_proc = NULL;
-uint32_t switch_tick;
 
+HIDDEN LIST_HEAD(ready_queue);
+HIDDEN uint32_t switch_tick;
 HIDDEN state_t idle_proc_state;
 
 HIDDEN void idle_process_code(void) {
@@ -31,8 +31,8 @@ void scheduler_init(pcb_code_t code) {
     STATUS(init_proc->p_s) = ALL_INT_ENABLE(init_proc->p_s);
     VM(init_proc->p_s) &= VM_OFF;
 
-    init_proc->original_priority = init_proc->priority = DEFAULT_PRIORITY;
-    pcb_insert_in_queue(&ready_queue, init_proc);
+    init_proc->original_priority = DEFAULT_PRIORITY;
+    scheduler_enqueue_process(init_proc);
 }
 
 HIDDEN void aging() {
@@ -43,35 +43,46 @@ HIDDEN void aging() {
 }
 
 void scheduler_account_time(bool kernel) {
+    // if interrupt was raised while idle was runnning, no point
+    // assigning time
     if (current_proc) {
+        // depending on param, time spent since last switch is
+        // accredited to either kernel or user
         if (kernel)
             current_proc->kernel_tm += getTODLO() - switch_tick;
         else
             current_proc->user_tm += getTODLO() - switch_tick;
     }
-
+    // then switch is reset
     switch_tick = getTODLO();
 }
 
 void scheduler_resume(bool time_slice_ended, state_t *old_state) {
     if (current_proc) {
+        //account for time spent in kernel
         scheduler_account_time(TRUE);
 
+        // if the process still has time left, it should keep going
         if (!time_slice_ended)
             LDST(old_state);
 
+        // otherwise, if processes are in queue, they should age to avoid
+        // starvation by process with highest priority
         if (!pcb_is_queue_empty(&ready_queue))
             aging();
 
+        // process state updated
         memcpy(&current_proc->p_s, old_state, sizeof(state_t));
-        // We reset current process priority to avoid inflated priority
-        current_proc->priority = current_proc->original_priority;
-        pcb_insert_in_queue(&ready_queue, current_proc);
+
+        scheduler_enqueue_process(current_proc);
     }
 
+    // if no current process and no processes waiting, execute idle
     if (pcb_is_queue_empty(&ready_queue))
         LDST(&idle_proc_state);
 
+    // if no current process but the queue is not empty, a new process
+    // should be selected
     scheduler_run();
 }
 
@@ -93,12 +104,14 @@ void scheduler_run() {
     LDST(&current_proc->p_s);
 }
 
-void scheduler_enqueue_process(pcb_t *proc, bool is_child) {
+// add to queue after resetting priority
+void scheduler_enqueue_process(pcb_t *proc) {
+    // We reset process priority to avoid inflated priority,
+    // which would result in starvation
     proc->priority = proc->original_priority;
+    // then we enqueue it again so that when a new process is selected
+    // it will be the one with highest priority
     pcb_insert_in_queue(&ready_queue, proc);
-
-    if (is_child)
-        pcb_insert_child(current_proc, proc);
 }
 
 void scheduler_block_current(int *semaddr, state_t *proc_state) {

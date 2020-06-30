@@ -48,9 +48,9 @@
 // no need for lower bound as device pointers are from DEV_REG_ADDR
 #define IS_TERMINAL(device) ((uint32_t)device >= TERM_0_ADDR)
 
-// TODO: modificare i nomi di queste macro
 #define BUS_TODLOW 0x1000001C
 #define BUS_TODHIGH 0x10000018
+// Following are for uARM compatibility
 #define getTODLO() (*((uint32_t *)BUS_TODLOW))
 #define getTODHI() (*((uint32_t *)BUS_TODHI))
 #define setTIMER(time) (*((uint32_t *)BUS_REG_TIMER) = (time))

@@ -37,10 +37,20 @@
 #define CR 0x0a /* carriage return as returned by the terminal */
 
 /* System constants */
-#define TIME_SLICE_MS 3000
+#define TIME_SLICE_MS 3
 #define TIME_SCALE *((uint32_t *)BUS_REG_TIME_SCALE)
-#define TIME_SLICE (TIME_SLICE_MS * (TIME_SCALE))
+#define TIME_SLICE (TIME_SLICE_MS * 1000 * (TIME_SCALE))
 #define TIMER_ACK (0xFFFFFFFF)
+
+/* syscall types */
+#define GETCPUTIME (1)
+#define CREATEPROCESS (2)
+#define TERMINATEPROCESS (3)
+#define VERHOGEN (4)
+#define PASSEREN (5)
+#define WAITIO (6)
+#define SPECPASSUP (7)
+#define GETPID (8)
 
 /* spec pass up types */
 #define SPECPASSUP_SYSBK_TYPE (0)
