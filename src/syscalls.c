@@ -116,6 +116,7 @@ void syscall_handler(void) {
             case GETCPUTIME: {  // user-kernel-wall
                 uint32_t *user = (uint32_t *)SYSARG1(*old_state);
                 uint32_t *kernel = (uint32_t *)SYSARG2(*old_state);
+                //TODO: include checks... what if i pass NULL pointers?
                 uint32_t *wallclock = (uint32_t *)SYSARG3(*old_state);
 
                 *wallclock = getTODLO() - current_proc->start_tm;
